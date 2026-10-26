@@ -1,8 +1,10 @@
-// Busca igrejas católicas perto de um ponto (ou de uma cidade) no OpenStreetMap.
+// Busca igrejas católicas perto de um ponto (ou de uma cidade): Google primeiro, OpenStreetMap de reserva.
 // Fica no servidor para evitar bloqueios do navegador e para guardar o resultado por alguns dias.
 import { getStore } from "@netlify/blobs";
 
 const UA = "BibliaCatolicaApp/1.0 (bibliacatolicaromana.netlify.app)";
+// Google (Places API New) — a mesma base do Google Maps. Usa a mesma chave da voz.
+const GKEY = process.env.GOOGLE_MAPS_KEY || process.env.GOOGLE_TTS_KEY;
 const OVERPASS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
@@ -62,6 +64,25 @@ async function geocode(q) {
   return null;
 }
 
+async function googleSearch(textQuery, lat, lon, radius) {
+  const body = { textQuery, languageCode: "pt-BR", regionCode: "BR", pageSize: 20 };
+  if (lat != null) body.locationBias = { circle: { center: { latitude: lat, longitude: lon }, radius: Math.min(50000, radius) } };
+  const r = await fetchT("https://places.googleapis.com/v1/places:searchText", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Goog-Api-Key": GKEY,
+      "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.shortFormattedAddress,places.location" },
+    body: JSON.stringify(body),
+  }, 7000);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error("google " + r.status + ": " + (j.error && j.error.message || ""));
+  return (j.places || []).filter(p => p.location).map(p => ({
+    name: (p.displayName && p.displayName.text) || "Igreja Católica",
+    lat: p.location.latitude, lon: p.location.longitude,
+    addr: (p.formattedAddress || p.shortFormattedAddress || "").replace(/, Brasil$/, "").replace(/, \d{5}-\d{3}/, ""),
+    mass: "",
+  })).filter(x => !NOT_CATHOLIC.test(x.name));
+}
+
 function addrOf(t) {
   const rua = [t["addr:street"], t["addr:housenumber"]].filter(Boolean).join(", ");
   return [rua, t["addr:suburb"] || t["addr:neighbourhood"], t["addr:city"]].filter(Boolean).join(" · ");
@@ -97,12 +118,45 @@ async function churches(lat, lon, radius) {
 export default async (req) => {
   const u = new URL(req.url);
   const radius = Math.min(30000, Math.max(1000, parseInt(u.searchParams.get("r"), 10) || 10000));
+  let googleErrMsg = null;
   try {
     let lat = parseFloat(u.searchParams.get("lat")), lon = parseFloat(u.searchParams.get("lon")), label = "você";
     const city = (u.searchParams.get("q") || "").trim();
+
+    // 1) Google
+    if (GKEY) {
+      try {
+        const store = getStore("igrejas");
+        const gkey = "g:" + (city ? "q:" + city.toLowerCase() : `${lat.toFixed(2)},${lon.toFixed(2)}`) + ":" + radius;
+        let hit = await store.get(gkey, { type: "json" }).catch(() => null);
+        if (!hit || Date.now() - hit.at > 7 * 864e5) {
+          let list, cLat = lat, cLon = lon, cLabel = label;
+          if (city) {
+            list = await googleSearch("igreja católica em " + city, null, null, radius);
+            // centro = mediana das igrejas encontradas (rápido, sem depender de outro serviço)
+            if (list.length) {
+              const med = arr => arr.slice().sort((x, y) => x - y)[Math.floor(arr.length / 2)];
+              cLat = med(list.map(x => x.lat)); cLon = med(list.map(x => x.lon)); cLabel = splitCity(city).city;
+            }
+          } else {
+            list = await googleSearch("igreja católica", lat, lon, radius);
+          }
+          hit = { at: Date.now(), lat: cLat, lon: cLon, label: cLabel, list };
+          if (list.length) await store.setJSON(gkey, hit).catch(() => {});
+        }
+        if (hit.list.length) {
+          const cl = hit.lat ?? lat, co = hit.lon ?? lon;
+          const out = hit.list.map(x => ({ ...x, d: Number.isFinite(cl) ? dist(cl, co, x.lat, x.lon) : 0 }))
+            .filter(x => !Number.isFinite(cl) || x.d <= radius / 1000 * 1.6).sort((a, b) => a.d - b.d);
+          if (out.length) return json({ lat: cl, lon: co, label: city ? (hit.label || city) : label, source: "google", list: out });
+        }
+      } catch (e) { googleErrMsg = String(e.message || e); }
+    }
+
+    // 2) Reserva: OpenStreetMap
     if (city) {
       const g = await geocode(city);
-      if (!g) return json({ error: "cidade_nao_encontrada" }, 404, "no-store");
+      if (!g) return json({ error: "cidade_nao_encontrada", google: googleErrMsg }, 404, "no-store");
       ({ lat, lon, label } = g);
     }
     if (!(Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) return json({ error: "local_invalido" }, 400, "no-store");
@@ -116,7 +170,7 @@ export default async (req) => {
     await store.setJSON(key, { at: Date.now(), list }).catch(() => {});
     return json({ lat, lon, label, list });
   } catch (e) {
-    return json({ error: "falha", detail: String(e.message || e) }, 502, "no-store");
+    return json({ error: "falha", detail: String(e.message || e), google: googleErrMsg }, 502, "no-store");
   }
 };
 
