@@ -829,8 +829,8 @@ $("#ch-city").onsubmit=async e=>{e.preventDefault();const q=$("#ch-q").value.tri
 function setGmaps(lat,lon){$("#ch-gmaps").href=lat!=null?"https://www.google.com/maps/search/igreja+cat%C3%B3lica/@"+lat.toFixed(5)+","+lon.toFixed(5)+",14z":"https://www.google.com/maps/search/igreja+cat%C3%B3lica"}
 function chMsg(t,d){$("#ch-list").textContent="";$("#ch-count").textContent="";const em=$("#ch-empty");em.hidden=false;em.innerHTML="<strong></strong>";em.firstChild.textContent=t;em.append(d)}
 function distKm(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
-const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
-async function serverChurches(qs){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),45000);
+const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.private.coffee/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
+async function serverChurches(qs){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),14000);
   const r=await fetch("/api/igrejas?"+qs+"&r="+chRadius,{signal:c.signal});clearTimeout(t);
   const j=await r.json().catch(()=>null);return j}catch(e){return null}}
 function saveLast(sv){store.set("chLast",{label:sv.label,lat:sv.lat,lon:sv.lon,r:chRadius,list:sv.list.slice(0,150),at:Date.now()})}
@@ -838,11 +838,13 @@ async function findChurches(lat,lon,label){chCenter={lat,lon,label};setGmaps(lat
   const sv=IN_PREVIEW?null:await serverChurches("lat="+lat.toFixed(5)+"&lon="+lon.toFixed(5));
   if(sv&&sv.list){saveLast(sv);renderChurches(sv.list,label);return}
   const a="(around:"+chRadius+","+lat.toFixed(5)+","+lon.toFixed(5)+")";
-  const q='[out:json][timeout:25];(nwr["amenity"="place_of_worship"]["religion"="christian"]["denomination"~"catholic",i]'+a+';'+
+  const q='[out:json][timeout:15];(nwr["amenity"="place_of_worship"]["religion"="christian"]["denomination"~"catholic",i]'+a+';'+
     'nwr["amenity"="place_of_worship"]["religion"="christian"][!"denomination"]["name"~"^(Par[oó]quia|Matriz|Catedral|Santu[aá]rio|Bas[ií]lica|Capela|Igreja (Matriz|Nossa Senhora|de Nossa Senhora|S[aã]o|de S[aã]o|Santa|de Santa|Santo|de Santo|do Sagrado|do Divino|Sagrado|Divino))",i]'+a+';);out center tags;';
-  let data=null;
-  for(const url of OVERPASS){try{const r=await fetch(url,{method:"POST",body:"data="+encodeURIComponent(q),headers:{"Content-Type":"application/x-www-form-urlencoded"}});
-    if(r.ok){data=await r.json();break}}catch(e){}}
+  chMsg("Procurando igrejas…","Ainda buscando, mais alguns segundos.");
+  let data=null;const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),20000);
+  try{data=await Promise.any(OVERPASS.map(async url=>{const r=await fetch(url,{method:"POST",signal:ctl.signal,body:"data="+encodeURIComponent(q),headers:{"Content-Type":"application/x-www-form-urlencoded"}});
+    if(!r.ok)throw new Error(r.status);return r.json()}))}catch(e){}
+  clearTimeout(tm);ctl.abort();
   if(!data){if(IN_PREVIEW){chMsg("Busca bloqueada na prévia","Abra o app pelo site do Netlify para ver as igrejas.");return}chMsg("Não foi possível buscar agora","Tente de novo em alguns segundos, ou toque em “Ver igrejas no Google Maps” logo abaixo.");return}
   const seen=new Set();const list=data.elements.map(e=>{const la=e.lat??e.center?.lat,lo=e.lon??e.center?.lon,t=e.tags||{};
       return {name:t.name||"Igreja Católica",lat:la,lon:lo,addr:addrOf(t),mass:t.service_times||"",d:distKm(lat,lon,la,lo)}})
