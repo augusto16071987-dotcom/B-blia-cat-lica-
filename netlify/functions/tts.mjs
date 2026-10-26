@@ -80,14 +80,17 @@ export function buildChunks(intro, verses) {
   return out;
 }
 
-async function synth(ssml, voice) {
+// Modo narrador: voz mais grave e mais pausada (estilo locutor de Bíblia)
+const STYLES = { normal: { pitch: 0, speakingRate: 1.0 }, narrador: { pitch: -4, speakingRate: 0.86 } };
+async function synth(ssml, voice, style = "normal") {
+  const st = STYLES[style] || STYLES.normal;
   const r = await fetch("https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=" + encodeURIComponent(KEY), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       input: { ssml },
       voice: { languageCode: "pt-BR", name: voice },
-      audioConfig: { audioEncoding: "MP3", speakingRate: 1.0 },
+      audioConfig: { audioEncoding: "MP3", speakingRate: st.speakingRate, pitch: st.pitch },
       enableTimePointing: ["SSML_MARK"],
     }),
   });
@@ -124,14 +127,16 @@ export default async (req) => {
       return json({ default: VOICE, voices: await voiceList() }, 200, "public, max-age=3600");
     }
     const voice = KEY ? await pickVoice(url.searchParams.get("voice")) : VOICE;
+    const style = url.searchParams.get("style") === "narrador" ? "narrador" : "normal";
+    const vkey = style === "normal" ? voice : `${voice}~${style}`;
 
     // Amostra para o botão "Ouvir" na escolha de voz
     if (url.searchParams.has("sample")) {
-      const k = `${voice}/sample.mp3`;
+      const k = `${vkey}/sample.mp3`;
       let buf = await store.get(k, { type: "arrayBuffer" });
       if (!buf) {
         if (!KEY) return json({ error: "sem_chave" }, 503, "no-store");
-        const r = await synth("<speak>" + esc(SAMPLE) + "</speak>", voice);
+        const r = await synth("<speak>" + esc(SAMPLE) + "</speak>", voice, style);
         await store.set(k, r.audio);
         buf = r.audio;
       }
@@ -144,7 +149,7 @@ export default async (req) => {
     const B = await bible(url.origin);
     const book = B.find(x => x.id === id);
     if (!book || !(c >= 1 && c <= book.c.length)) return json({ error: "capitulo_invalido" }, 400, "no-store");
-    const base = `${voice}/${id}/${c}`;
+    const base = `${vkey}/${id}/${c}`;
 
     // Um pedaço de áudio
     if (p != null) {
@@ -159,9 +164,9 @@ export default async (req) => {
       if (!KEY) return json({ error: "sem_chave" }, 503, "no-store");
       const intro = (id === "PSA" ? "Salmo " : book.n + ", capítulo ") + c + ".";
       const chunks = buildChunks(intro, book.c[c - 1]);
-      const done = await inBatches(chunks, 8, s => synth(s, voice));
+      const done = await inBatches(chunks, 8, s => synth(s, voice, style));
       await Promise.all(done.map((d, i) => store.set(`${base}/${i}.mp3`, d.audio)));
-      meta = { voice, parts: done.map(d => ({ marks: d.marks })) };
+      meta = { voice, style, parts: done.map(d => ({ marks: d.marks })) };
       await store.setJSON(`${base}/meta.json`, meta);
     }
     return json(meta);
