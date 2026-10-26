@@ -9,13 +9,13 @@ const OVERPASS = [
   "https://overpass.kumi.systems/api/interpreter",
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
-const CATHOLIC_NAME = /^(par[oó]quia|matriz|catedral|santu[aá]rio|bas[ií]lica|capela|comunidade|igreja (matriz|de )?(nossa senhora|n\.? ?sra|s[aã]o|santa|santo|sagrad|divino|bom jesus|cristo rei|imaculad))/i;
+const CATHOLIC_NAME = /^(par[oó]quia|matriz|catedral|santu[aá]rio|bas[ií]lica|capela|comunidade (cat[oó]lica|de )?(s[aã]o|santa|santo|nossa)|igreja (matriz|cat[oó]lica)|igreja (de |da |do )?(nossa senhora|n\.? ?sra|s[aã]o|santa|santo|sagrad|divino|bom jesus|cristo rei|imaculad))/i;
 const NOT_CATHOLIC = /(assembl|batista|presbit|universal|adventista|metodista|luterana|evang|deus [ée] amor|quadrangular|congrega[cç][aã]o crist|mundial|pentecost|testemunha|mórmon|jesus cristo dos santos)/i;
 
 const json = (obj, status = 200, cache = "public, max-age=3600") =>
   new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json", "cache-control": cache } });
 
-async function fetchT(url, opts = {}, ms = 20000) {
+async function fetchT(url, opts = {}, ms = 7000) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
   try { return await fetch(url, { ...opts, signal: c.signal, headers: { "User-Agent": UA, ...(opts.headers || {}) } }); }
   finally { clearTimeout(t); }
@@ -40,25 +40,25 @@ function dist(a, b, c, d) {
 }
 
 async function churches(lat, lon, radius) {
-  const q = `[out:json][timeout:25];nwr["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});out center tags;`;
-  let lastErr;
-  for (const url of OVERPASS) {
-    try {
-      const r = await fetchT(url, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
-      if (!r.ok) { lastErr = new Error(url + " " + r.status); continue; }
-      const j = await r.json();
-      const seen = new Set();
-      return (j.elements || []).map(e => {
-        const t = e.tags || {}, la = e.lat ?? e.center?.lat, lo = e.lon ?? e.center?.lon, name = t.name || "";
-        const den = (t.denomination || "").toLowerCase();
-        const catholic = den.includes("catholic") || (!den && name && CATHOLIC_NAME.test(name) && !NOT_CATHOLIC.test(name));
-        if (!catholic || la == null) return null;
-        return { name: name || "Igreja Católica", lat: la, lon: lo, addr: addrOf(t), mass: t.service_times || "", d: dist(lat, lon, la, lo) };
-      }).filter(x => x && !seen.has(x.name + Math.round(x.lat * 1e3)) && seen.add(x.name + Math.round(x.lat * 1e3)))
-        .sort((a, b) => a.d - b.d).slice(0, 150);
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error("overpass");
+  const q = `[out:json][timeout:8];nwr["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});out center tags;`;
+  // pergunta para todos os servidores de mapa ao mesmo tempo e usa o primeiro que responder
+  const ask = async (url) => {
+    const r = await fetchT(url, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } }, 7500);
+    if (!r.ok) throw new Error(url + " " + r.status);
+    const j = await r.json();
+    if (j.remark && /error|timed out/i.test(j.remark) && !(j.elements || []).length) throw new Error(j.remark);
+    return j;
+  };
+  const j = await Promise.any(OVERPASS.map(ask));
+  const seen = new Set();
+  return (j.elements || []).map(e => {
+    const t = e.tags || {}, la = e.lat ?? e.center?.lat, lo = e.lon ?? e.center?.lon, name = t.name || "";
+    const den = (t.denomination || "").toLowerCase();
+    const catholic = den.includes("catholic") || (!den && name && CATHOLIC_NAME.test(name) && !NOT_CATHOLIC.test(name));
+    if (!catholic || la == null) return null;
+    return { name: name || "Igreja Católica", lat: la, lon: lo, addr: addrOf(t), mass: t.service_times || "", d: dist(lat, lon, la, lo) };
+  }).filter(x => x && !seen.has(x.name + Math.round(x.lat * 1e3)) && seen.add(x.name + Math.round(x.lat * 1e3)))
+    .sort((a, b) => a.d - b.d).slice(0, 150);
 }
 
 export default async (req) => {
