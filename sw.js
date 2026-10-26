@@ -1,5 +1,5 @@
 // Guarda o app e o texto bíblico para funcionar sem internet.
-const CACHE = "biblia-v5";
+const CACHE = "biblia-v8";
 const CORE = ["./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {
@@ -23,6 +23,8 @@ self.addEventListener("fetch", e => {
   const sameOrigin = url.origin === self.location.origin;
   const fonts = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if (!sameOrigin && !fonts) return;
+  // Busca de igrejas e lista de vozes: sempre da internet
+  if (sameOrigin && (url.pathname === "/api/igrejas" || url.searchParams.has("voices"))) return;
   // Demais arquivos (texto bíblico, ícones, fontes): cache primeiro
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
     if (r.ok || r.type === "opaque") { const cp = r.clone(); caches.open(CACHE).then(c => c.put(req, cp)); }
