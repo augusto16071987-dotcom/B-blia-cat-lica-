@@ -232,6 +232,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
 .ch-go a{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px}
 .ch-go a.ir{background:var(--rubric);color:#fff}
 .ch-go a.waze{border:1px solid var(--line);color:var(--ink);font-size:12.5px;padding:6px 10px}
+.gmaps{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;border-radius:12px;padding:13px;font-weight:600}
 .note{color:var(--muted);font-size:12px;line-height:1.5;margin:16px 0}
 
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
@@ -319,6 +320,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       <div class="count" id="ch-count"></div>
       <ul class="ch-list" id="ch-list"></ul>
       <div class="empty" id="ch-empty"><strong>Encontre uma igreja</strong>Toque em “Usar minha localização” ou digite o nome da cidade. Você verá as paróquias e capelas próximas, com o endereço e o botão para ir pelo GPS.</div>
+      <a class="gmaps" id="ch-gmaps" target="_blank" rel="noopener" href="https://www.google.com/maps/search/igreja+cat%C3%B3lica"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>Ver igrejas no Google Maps</a>
       <p class="note">Dados do OpenStreetMap, um mapa feito por voluntários. Algumas capelas podem faltar ou estar sem endereço; o botão Ir funciona mesmo assim, pela posição no mapa.</p>
     </div></main>
   </section>
@@ -815,22 +817,33 @@ $("#ch-gps").onclick=()=>{if(!navigator.geolocation){chMsg("Este aparelho não i
     navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:false,timeout:20000,maximumAge:600000})},
     {enableHighAccuracy:true,timeout:12000,maximumAge:60000})};
 $("#ch-city").onsubmit=async e=>{e.preventDefault();const q=$("#ch-q").value.trim();if(q.length<3)return;$("#ch-q").blur();
-  chMsg("Procurando a cidade…","");
+  chMsg("Procurando igrejas em "+q+"…","Isso leva alguns segundos.");
+  const sv=await serverChurches("q="+encodeURIComponent(q));
+  if(sv&&sv.list){chCenter={lat:sv.lat,lon:sv.lon,label:sv.label};setGmaps(sv.lat,sv.lon);saveLast(sv);renderChurches(sv.list,sv.label);return}
+  if(sv&&sv.error==="cidade_nao_encontrada"){chMsg("Cidade não encontrada","Confira o nome e tente incluir o estado, ex.: Linhares ES.");return}
+  $("#ch-gmaps").href="https://www.google.com/maps/search/igreja+cat%C3%B3lica+"+encodeURIComponent(q);
   try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&accept-language=pt-BR&q="+encodeURIComponent(q));
     const j=await r.json();if(!j.length){chMsg("Cidade não encontrada","Confira o nome e tente incluir o estado, ex.: Linhares ES.");return}
     findChurches(+j[0].lat,+j[0].lon,j[0].display_name.split(",")[0])}
   catch(err){chMsg("Sem conexão","A busca de igrejas precisa de internet. Tente de novo quando estiver conectado.")}};
+function setGmaps(lat,lon){$("#ch-gmaps").href=lat!=null?"https://www.google.com/maps/search/igreja+cat%C3%B3lica/@"+lat.toFixed(5)+","+lon.toFixed(5)+",14z":"https://www.google.com/maps/search/igreja+cat%C3%B3lica"}
 function chMsg(t,d){$("#ch-list").textContent="";$("#ch-count").textContent="";const em=$("#ch-empty");em.hidden=false;em.innerHTML="<strong></strong>";em.firstChild.textContent=t;em.append(d)}
 function distKm(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
-async function findChurches(lat,lon,label){chCenter={lat,lon,label};chMsg("Procurando igrejas…","Isso leva alguns segundos.");
+async function serverChurches(qs){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),45000);
+  const r=await fetch("/api/igrejas?"+qs+"&r="+chRadius,{signal:c.signal});clearTimeout(t);
+  const j=await r.json().catch(()=>null);return j}catch(e){return null}}
+function saveLast(sv){store.set("chLast",{label:sv.label,lat:sv.lat,lon:sv.lon,r:chRadius,list:sv.list.slice(0,150),at:Date.now()})}
+async function findChurches(lat,lon,label){chCenter={lat,lon,label};setGmaps(lat,lon);chMsg("Procurando igrejas…","Isso leva alguns segundos.");
+  const sv=IN_PREVIEW?null:await serverChurches("lat="+lat.toFixed(5)+"&lon="+lon.toFixed(5));
+  if(sv&&sv.list){saveLast(sv);renderChurches(sv.list,label);return}
   const a="(around:"+chRadius+","+lat.toFixed(5)+","+lon.toFixed(5)+")";
   const q='[out:json][timeout:25];(nwr["amenity"="place_of_worship"]["religion"="christian"]["denomination"~"catholic",i]'+a+';'+
     'nwr["amenity"="place_of_worship"]["religion"="christian"][!"denomination"]["name"~"^(Par[oó]quia|Matriz|Catedral|Santu[aá]rio|Bas[ií]lica|Capela|Igreja (Matriz|Nossa Senhora|de Nossa Senhora|S[aã]o|de S[aã]o|Santa|de Santa|Santo|de Santo|do Sagrado|do Divino|Sagrado|Divino))",i]'+a+';);out center tags;';
   let data=null;
   for(const url of OVERPASS){try{const r=await fetch(url,{method:"POST",body:"data="+encodeURIComponent(q),headers:{"Content-Type":"application/x-www-form-urlencoded"}});
     if(r.ok){data=await r.json();break}}catch(e){}}
-  if(!data){if(IN_PREVIEW){chMsg("Busca bloqueada na prévia","Abra o app pelo site do Netlify para ver as igrejas.");return}chMsg("Não foi possível buscar agora","A busca de igrejas precisa de internet. Verifique a conexão e tente de novo em alguns segundos.");return}
+  if(!data){if(IN_PREVIEW){chMsg("Busca bloqueada na prévia","Abra o app pelo site do Netlify para ver as igrejas.");return}chMsg("Não foi possível buscar agora","Tente de novo em alguns segundos, ou toque em “Ver igrejas no Google Maps” logo abaixo.");return}
   const seen=new Set();const list=data.elements.map(e=>{const la=e.lat??e.center?.lat,lo=e.lon??e.center?.lon,t=e.tags||{};
       return {name:t.name||"Igreja Católica",lat:la,lon:lo,addr:addrOf(t),mass:t.service_times||"",d:distKm(lat,lon,la,lo)}})
     .filter(x=>x.lat!=null&&!seen.has(x.name+Math.round(x.lat*1e3))&&seen.add(x.name+Math.round(x.lat*1e3))).sort((a,b)=>a.d-b.d);
@@ -838,7 +851,7 @@ async function findChurches(lat,lon,label){chCenter={lat,lon,label};chMsg("Procu
 function addrOf(t){const rua=[t["addr:street"],t["addr:housenumber"]].filter(Boolean).join(", ");
   const parts=[rua,t["addr:suburb"]||t["addr:neighbourhood"],t["addr:city"]].filter(Boolean);return parts.join(" · ")}
 function renderChurches(list,label,cached){const ul=$("#ch-list");ul.textContent="";$("#ch-empty").hidden=list.length>0;
-  if(!list.length){chMsg("Nenhuma igreja encontrada nesse raio","Aumente a distância para 25 km ou procure pela cidade.");return}
+  if(!list.length){chMsg("Nenhuma igreja encontrada nesse raio","Aumente a distância para 25 km, ou toque em “Ver igrejas no Google Maps” logo abaixo.");return}
   $("#ch-count").textContent=list.length+(list.length===1?" igreja":" igrejas")+" perto de "+label+(cached?" · última busca":"");
   const frag=document.createDocumentFragment();
   list.forEach(c=>{const li=document.createElement("li");li.className="ch-item";
@@ -853,7 +866,7 @@ function renderChurches(list,label,cached){const ul=$("#ch-list");ul.textContent
     go.append(g,w);li.append(h,go,ad,ds);
     if(c.mass){const m=document.createElement("div");m.className="mass";m.textContent="Horários: "+c.mass;li.append(m)}
     frag.append(li)});ul.append(frag)}
-function loadLastChurches(){if($("#ch-list").children.length)return;const L=store.get("chLast",null);
+function loadLastChurches(){if($("#ch-list").children.length)return;const L=store.get("chLast",null);if(L)setGmaps(L.lat,L.lon);
   if(L&&L.list){chCenter={lat:L.lat,lon:L.lon,label:L.label};renderChurches(L.list,L.label,true)}}
 
 /* ---------- carregar ---------- */
