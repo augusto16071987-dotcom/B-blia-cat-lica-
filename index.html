@@ -386,6 +386,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
 <!-- escolher voz -->
 <div class="vsheet" id="vsheet" hidden><div class="panel gut"><div class="wrap">
   <h2>Escolher a voz</h2><p class="sub">Toque em “Ouvir” para testar e escolha a que preferir.</p>
+  <div class="set-row app-only" style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:6px 0 4px"><label for="narr"><b>Modo narrador</b><br><span style="font-weight:400;color:var(--muted);font-size:12.5px">voz mais grave, pausada e solene, para as vozes do app</span></label><input id="narr" type="checkbox" style="width:24px;height:24px;accent-color:var(--rubric);flex:none"></div>
   <div id="vlist" role="radiogroup" aria-label="Vozes"></div>
   <div class="set-row sys-only" style="border-bottom:1px solid var(--line)"><label for="pitch2">Tom<br><span style="font-weight:400;color:var(--muted);font-size:12.5px">arraste para a esquerda para uma voz mais grave</span></label><input id="pitch2" type="range" min="0.5" max="1.5" step="0.05" value="1" style="flex:1;max-width:180px;accent-color:var(--rubric)"></div>
   <div class="vhelp" id="vhelp"></div>
@@ -602,8 +603,8 @@ const IN_FRAME=(()=>{try{return window.top!==window.self}catch(e){return true}})
 const SYN=("speechSynthesis" in window)?window.speechSynthesis:null;
 const API="/api/tts";
 const tts={on:false,paused:false,b:0,c:0,i:0,stopAt:null,engine:"sys",rate:store.get("rate",1),voice:store.get("voice",""),
-  useApp:store.get("useApp",true),appVoice:store.get("appVoice",""),appOK:!IN_FRAME,lock:null};
-let APPV=null,appvLoading=false;const vq=()=>tts.appVoice?"&voice="+encodeURIComponent(tts.appVoice):"";
+  useApp:store.get("useApp",true),appVoice:store.get("appVoice",""),narr:store.get("narr",true),appOK:!IN_FRAME,lock:null};
+let APPV=null,appvLoading=false;const vq=()=>(tts.appVoice?"&voice="+encodeURIComponent(tts.appVoice):"")+(tts.narr?"&style=narrador":"");
 if(!SYN&&!tts.appOK)$$(".tts-only").forEach(e=>e.hidden=true);
 let VOICES=[];
 function loadVoices(){if(!SYN)return;VOICES=SYN.getVoices().filter(v=>/^pt/i.test(v.lang));
@@ -649,7 +650,7 @@ function renderVoices(){const box=$("#vlist");box.textContent="";const cur=curVo
     "No Android: Configurações › procure “texto para voz” › engrenagem do Google › Instalar dados de voz › Português (Brasil).");}
 function tryVoice(v){if(!SYN)return;holdForTry();SYN.cancel();sampleAU.pause();
   const u=new SpeechSynthesisUtterance(SAMPLE);u.lang=v.lang;u.voice=v;u.rate=tts.rate;u.pitch=tts.pitch;SYN.speak(u)}
-function tryApp(av){holdForTry();SYN&&SYN.cancel();const v=av!=null&&av!==""?av:tts.appVoice;sampleAU.src=API+"?sample=1"+(v?"&voice="+encodeURIComponent(v):"");sampleAU.playbackRate=tts.rate;
+function tryApp(av){holdForTry();SYN&&SYN.cancel();const v=av!=null&&av!==""?av:tts.appVoice;sampleAU.src=API+"?sample=1"+(v?"&voice="+encodeURIComponent(v):"")+(tts.narr?"&style=narrador":"");sampleAU.playbackRate=tts.rate;
   sampleAU.play().catch(()=>toast("Não foi possível tocar a voz do app agora"));
   sampleAU.onerror=()=>toast("A voz do app ainda não está configurada no Netlify")}
 const TYPE_INFO={Neural2:["mais natural",0],Wavenet:["natural",1],Standard:["simples",2]};
@@ -659,16 +660,17 @@ function appName(v){const g=v.gender==="MALE"?"Masculina":v.gender==="FEMALE"?"F
   const same=APPV.voices.filter(x=>x.gender===v.gender);const n=appVoicesSorted().filter(x=>x.gender===v.gender).indexOf(v)+1;
   return g+(same.length>1?" "+n:"")}
 function appSub(v){const t=TYPE_INFO[v.type]?TYPE_INFO[v.type][0]:"";return [t&&("Qualidade "+t),v.name.replace("pt-BR-","")].filter(Boolean).join(" · ")}
-function appVoiceLabel(){if(!APPV)return "Voz do app";const v=APPV.voices.find(x=>x.name===(tts.appVoice||APPV.default));return v?"Voz do app · "+appName(v):"Voz do app"}
+function appVoiceLabel(){if(!APPV)return "Voz do app";const v=APPV.voices.find(x=>x.name===(tts.appVoice||APPV.default));return (v?"Voz do app · "+appName(v):"Voz do app")+(tts.narr?" · narrador":"")}
 async function loadAppVoices(){appvLoading=true;
   try{const r=await fetch(API+"?voices=1");const j=await r.json();if(r.ok&&j.voices){APPV=j;
       if(tts.appVoice&&!j.voices.some(v=>v.name===tts.appVoice)){tts.appVoice="";store.set("appVoice","")}}}catch(e){}
   appvLoading=false;paintVoiceLabel();if(!$("#vsheet").hidden)renderVoices()}
 function holdForTry(){if(tts.on&&!tts.paused){tts.paused=true;engPause();paintPlayer()}}
-function openVoices(){loadVoices();renderVoices();$("#vsheet").hidden=false}
+function openVoices(){loadVoices();renderVoices();$("#narr").checked=tts.narr;$$(".app-only").forEach(e=>e.hidden=!tts.appOK);$("#vsheet").hidden=false}
+$("#narr").onchange=e=>{tts.narr=e.target.checked;store.set("narr",tts.narr);if(!tts.useApp){tts.useApp=true;store.set("useApp",true);renderVoices()}paintVoiceLabel();tryApp()};
 $("#voice-open").onclick=openVoices;$("#pl-voice").onclick=openVoices;
 $("#vclose").onclick=()=>{$("#vsheet").hidden=true;SYN&&SYN.cancel();sampleAU.pause();
-  if(tts.on){const wantApp=appSelected();if((tts.engine==="app")!==wantApp||(wantApp&&tts.playingVoice!==tts.appVoice)){const {b,c,i}=tts;ttsStart(b,c,i)}else if(tts.paused)resume()}};
+  if(tts.on){const wantApp=appSelected();if((tts.engine==="app")!==wantApp||(wantApp&&tts.playingVoice!==tts.appVoice+(tts.narr?"~n":""))){const {b,c,i}=tts;ttsStart(b,c,i)}else if(tts.paused)resume()}};
 $("#vsheet").onclick=e=>{if(e.target.id==="vsheet")$("#vclose").click()};
 tts.follow=store.get("follow",true);$("#follow").checked=tts.follow;
 $("#follow").onchange=e=>{tts.follow=e.target.checked;store.set("follow",tts.follow);if(!tts.follow)resetWords()};
@@ -718,10 +720,10 @@ function sysVerse(){const ch=B[tts.b].c[tts.c];
 /* --- voz do app (áudio do servidor) --- */
 const AU=new Audio();AU.preload="auto";
 let meta=null,part=0,raf=0,blobURL=null,loadId=0;const blobCache=new Map();
-async function partBlob(b,c,p){const k=tts.appVoice+"/"+B[b].id+"/"+(c+1)+"/"+p;if(blobCache.has(k))return blobCache.get(k);
+async function partBlob(b,c,p){const k=tts.appVoice+(tts.narr?"~n":"")+"/"+B[b].id+"/"+(c+1)+"/"+p;if(blobCache.has(k))return blobCache.get(k);
   const pr=fetch(API+"?b="+B[b].id+"&c="+(c+1)+"&p="+p+vq()).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()});
   blobCache.set(k,pr);pr.catch(()=>blobCache.delete(k));if(blobCache.size>8)blobCache.delete(blobCache.keys().next().value);return pr}
-async function appStart(fromVerse){const my=++loadId,b=tts.b,c=tts.c;tts.playingVoice=tts.appVoice;
+async function appStart(fromVerse){const my=++loadId,b=tts.b,c=tts.c;tts.playingVoice=tts.appVoice+(tts.narr?"~n":"");
   $("#pl-sub").textContent="Carregando a voz…";
   try{const r=await fetch(API+"?b="+B[b].id+"&c="+(c+1)+vq());const j=await r.json().catch(()=>null);
     if(!r.ok||!j||!j.parts)throw new Error(j&&j.error||r.status);
