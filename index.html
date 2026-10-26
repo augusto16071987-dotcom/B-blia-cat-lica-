@@ -602,7 +602,8 @@ const IN_FRAME=(()=>{try{return window.top!==window.self}catch(e){return true}})
 const SYN=("speechSynthesis" in window)?window.speechSynthesis:null;
 const API="/api/tts";
 const tts={on:false,paused:false,b:0,c:0,i:0,stopAt:null,engine:"sys",rate:store.get("rate",1),voice:store.get("voice",""),
-  useApp:store.get("useApp",true),appOK:!IN_FRAME,lock:null};
+  useApp:store.get("useApp",true),appVoice:store.get("appVoice",""),appOK:!IN_FRAME,lock:null};
+let APPV=null,appvLoading=false;const vq=()=>tts.appVoice?"&voice="+encodeURIComponent(tts.appVoice):"";
 if(!SYN&&!tts.appOK)$$(".tts-only").forEach(e=>e.hidden=true);
 let VOICES=[];
 function loadVoices(){if(!SYN)return;VOICES=SYN.getVoices().filter(v=>/^pt/i.test(v.lang));
@@ -615,39 +616,59 @@ const genderOf=v=>MALE.test(v.name)?"Voz masculina":FEMALE.test(v.name)?"Voz fem
 function voiceLabel(v){if(!v)return "Padrão do celular";return v.name.replace(/^(Microsoft|Google|Apple)\s+/,"").replace(/\s*\(.*\)$/,"").replace(/ - .*$/,"").replace(/\bportugu[eê]s( do brasil| \(brasil\))?/i,"Português")}
 function curVoice(){return VOICES.find(v=>v.name===tts.voice)||VOICES.find(isBR)||VOICES[0]||null}
 const appSelected=()=>tts.useApp&&tts.appOK;
-function paintVoiceLabel(){$("#voice-open").textContent=appSelected()?"Voz do app (masculina)":voiceLabel(curVoice());
+function paintVoiceLabel(){$("#voice-open").textContent=appSelected()?appVoiceLabel():voiceLabel(curVoice());
   $$(".sys-only").forEach(e=>e.hidden=appSelected())}
 if(SYN){loadVoices();SYN.onvoiceschanged=loadVoices}else paintVoiceLabel();
+if(tts.appOK)setTimeout(loadAppVoices,2500);
 const SAMPLE="O Senhor é meu pastor, nada me faltará.";
 const sampleAU=new Audio();
 function renderVoices(){const box=$("#vlist");box.textContent="";const cur=curVoice();
   const opts=[];
-  if(tts.appOK)opts.push({app:true,name:"Voz do app",sub:"Voz masculina · natural · igual para todos · baixa uma vez e funciona sem internet",checked:appSelected()});
+  if(tts.appOK){
+    if(APPV&&APPV.voices.length){const def=tts.appVoice||APPV.default;
+      appVoicesSorted().forEach(v=>opts.push({app:true,av:v.name,name:appName(v),sub:appSub(v),checked:appSelected()&&v.name===def}))}
+    else opts.push({app:true,av:"",name:"Voz do app",sub:appvLoading?"Carregando a lista de vozes…":"Voz masculina · natural · igual para todos",checked:appSelected()});
+    if(!APPV&&!appvLoading)loadAppVoices()}
   VOICES.forEach(v=>opts.push({v,name:voiceLabel(v),sub:[genderOf(v),isBR(v)?"Brasil":"Portugal",v.localService?"funciona sem internet":"precisa de internet"].filter(Boolean).join(" · "),
     checked:!appSelected()&&cur&&v.name===cur.name}));
-  opts.forEach(o=>{const row=document.createElement("div");row.className="vopt";row.setAttribute("role","radio");row.setAttribute("aria-checked",String(!!o.checked));row.tabIndex=0;
+  let lastApp=null;
+  opts.forEach(o=>{if(o.app!==lastApp){lastApp=o.app;const hd=document.createElement("div");hd.className="eyebrow";hd.style.margin="16px 0 4px";
+      hd.textContent=o.app?"Vozes do app · iguais em qualquer celular":"Vozes do seu celular";box.append(hd)}
+    const row=document.createElement("div");row.className="vopt";row.setAttribute("role","radio");row.setAttribute("aria-checked",String(!!o.checked));row.tabIndex=0;
     row.innerHTML='<span class="radio"></span><span class="vn"><b></b><span></span></span><button class="try">Ouvir</button>';
     row.querySelector("b").textContent=o.name;row.querySelector(".vn span").textContent=o.sub;
     row.onclick=e=>{const tryOnly=!!e.target.closest(".try");
-      if(!tryOnly){if(o.app){tts.useApp=true}else{tts.useApp=false;tts.voice=o.v.name;store.set("voice",o.v.name)}
+      if(!tryOnly){if(o.app){tts.useApp=true;if(o.av){tts.appVoice=o.av;store.set("appVoice",o.av)}}else{tts.useApp=false;tts.voice=o.v.name;store.set("voice",o.v.name)}
         store.set("useApp",tts.useApp);paintVoiceLabel();renderVoices()}
-      o.app?tryApp():tryVoice(o.v)};
+      o.app?tryApp(o.av):tryVoice(o.v)};
     box.append(row)});
   const h=$("#vhelp");const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
-  h.innerHTML=(tts.appOK?"<b>Voz do app</b> é a voz fixa: a mesma em qualquer celular. Cada capítulo é baixado na primeira vez que você ouve e fica guardado.<br><br>":
+  h.innerHTML=(tts.appOK?"<b>Vozes do app</b> são iguais em qualquer celular. Cada capítulo é preparado na primeira vez que alguém ouve com aquela voz e fica guardado.<br><br>":
     "<b>A voz do app só funciona no app publicado</b> (aqui na prévia do chat ela fica bloqueada).<br><br>")+
     "<b>Vozes do celular:</b> dependem do que está instalado no aparelho. "+(ios?"No iPhone: Ajustes › Acessibilidade › Conteúdo Falado › Vozes › Português (Brasil).":
     "No Android: Configurações › procure “texto para voz” › engrenagem do Google › Instalar dados de voz › Português (Brasil).");}
 function tryVoice(v){if(!SYN)return;holdForTry();SYN.cancel();sampleAU.pause();
   const u=new SpeechSynthesisUtterance(SAMPLE);u.lang=v.lang;u.voice=v;u.rate=tts.rate;u.pitch=tts.pitch;SYN.speak(u)}
-function tryApp(){holdForTry();SYN&&SYN.cancel();sampleAU.src=API+"?sample=1";sampleAU.playbackRate=tts.rate;
+function tryApp(av){holdForTry();SYN&&SYN.cancel();const v=av!=null&&av!==""?av:tts.appVoice;sampleAU.src=API+"?sample=1"+(v?"&voice="+encodeURIComponent(v):"");sampleAU.playbackRate=tts.rate;
   sampleAU.play().catch(()=>toast("Não foi possível tocar a voz do app agora"));
   sampleAU.onerror=()=>toast("A voz do app ainda não está configurada no Netlify")}
+const TYPE_INFO={Neural2:["mais natural",0],Wavenet:["natural",1],Standard:["simples",2]};
+function appVoicesSorted(){return APPV.voices.slice().sort((a,b)=>(a.gender==="MALE"?0:1)-(b.gender==="MALE"?0:1)||
+  (TYPE_INFO[a.type]?.[1]??9)-(TYPE_INFO[b.type]?.[1]??9)||a.name.localeCompare(b.name))}
+function appName(v){const g=v.gender==="MALE"?"Masculina":v.gender==="FEMALE"?"Feminina":"Voz";
+  const same=APPV.voices.filter(x=>x.gender===v.gender);const n=appVoicesSorted().filter(x=>x.gender===v.gender).indexOf(v)+1;
+  return g+(same.length>1?" "+n:"")}
+function appSub(v){const t=TYPE_INFO[v.type]?TYPE_INFO[v.type][0]:"";return [t&&("Qualidade "+t),v.name.replace("pt-BR-","")].filter(Boolean).join(" · ")}
+function appVoiceLabel(){if(!APPV)return "Voz do app";const v=APPV.voices.find(x=>x.name===(tts.appVoice||APPV.default));return v?"Voz do app · "+appName(v):"Voz do app"}
+async function loadAppVoices(){appvLoading=true;
+  try{const r=await fetch(API+"?voices=1");const j=await r.json();if(r.ok&&j.voices){APPV=j;
+      if(tts.appVoice&&!j.voices.some(v=>v.name===tts.appVoice)){tts.appVoice="";store.set("appVoice","")}}}catch(e){}
+  appvLoading=false;paintVoiceLabel();if(!$("#vsheet").hidden)renderVoices()}
 function holdForTry(){if(tts.on&&!tts.paused){tts.paused=true;engPause();paintPlayer()}}
 function openVoices(){loadVoices();renderVoices();$("#vsheet").hidden=false}
 $("#voice-open").onclick=openVoices;$("#pl-voice").onclick=openVoices;
 $("#vclose").onclick=()=>{$("#vsheet").hidden=true;SYN&&SYN.cancel();sampleAU.pause();
-  if(tts.on){const wantApp=appSelected();if((tts.engine==="app")!==wantApp){const {b,c,i}=tts;ttsStart(b,c,i)}else if(tts.paused)resume()}};
+  if(tts.on){const wantApp=appSelected();if((tts.engine==="app")!==wantApp||(wantApp&&tts.playingVoice!==tts.appVoice)){const {b,c,i}=tts;ttsStart(b,c,i)}else if(tts.paused)resume()}};
 $("#vsheet").onclick=e=>{if(e.target.id==="vsheet")$("#vclose").click()};
 tts.follow=store.get("follow",true);$("#follow").checked=tts.follow;
 $("#follow").onchange=e=>{tts.follow=e.target.checked;store.set("follow",tts.follow);if(!tts.follow)resetWords()};
@@ -697,12 +718,12 @@ function sysVerse(){const ch=B[tts.b].c[tts.c];
 /* --- voz do app (áudio do servidor) --- */
 const AU=new Audio();AU.preload="auto";
 let meta=null,part=0,raf=0,blobURL=null,loadId=0;const blobCache=new Map();
-async function partBlob(b,c,p){const k=B[b].id+"/"+(c+1)+"/"+p;if(blobCache.has(k))return blobCache.get(k);
-  const pr=fetch(API+"?b="+B[b].id+"&c="+(c+1)+"&p="+p).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()});
+async function partBlob(b,c,p){const k=tts.appVoice+"/"+B[b].id+"/"+(c+1)+"/"+p;if(blobCache.has(k))return blobCache.get(k);
+  const pr=fetch(API+"?b="+B[b].id+"&c="+(c+1)+"&p="+p+vq()).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()});
   blobCache.set(k,pr);pr.catch(()=>blobCache.delete(k));if(blobCache.size>8)blobCache.delete(blobCache.keys().next().value);return pr}
-async function appStart(fromVerse){const my=++loadId,b=tts.b,c=tts.c;
+async function appStart(fromVerse){const my=++loadId,b=tts.b,c=tts.c;tts.playingVoice=tts.appVoice;
   $("#pl-sub").textContent="Carregando a voz…";
-  try{const r=await fetch(API+"?b="+B[b].id+"&c="+(c+1));const j=await r.json().catch(()=>null);
+  try{const r=await fetch(API+"?b="+B[b].id+"&c="+(c+1)+vq());const j=await r.json().catch(()=>null);
     if(!r.ok||!j||!j.parts)throw new Error(j&&j.error||r.status);
     if(my!==loadId||!tts.on)return;meta=j;
     // achar o pedaço e o tempo do versículo pedido
@@ -719,7 +740,7 @@ async function playPart(p,t,my){part=p;const b=tts.b,c=tts.c;
   if(!tts.paused){await AU.play();loop()}
   paintPlayer();
   if(p+1<meta.parts.length)partBlob(b,c,p+1).catch(()=>{});      // já baixa o próximo pedaço
-  else{const n=nextOf(b,c);if(n)fetch(API+"?b="+B[n[0]].id+"&c="+(n[1]+1)).catch(()=>{})}}
+  else{const n=nextOf(b,c);if(n)fetch(API+"?b="+B[n[0]].id+"&c="+(n[1]+1)+vq()).catch(()=>{})}}
 AU.onended=()=>{if(!tts.on||tts.engine!=="app")return;
   const v=tts.i;markWord(v,B[tts.b].c[tts.c][v],Infinity,0);
   if(part+1<meta.parts.length)playPart(part+1,0,loadId).catch(appFail);else chapterEnded()};
