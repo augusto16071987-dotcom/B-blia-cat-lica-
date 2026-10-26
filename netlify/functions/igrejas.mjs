@@ -21,12 +21,45 @@ async function fetchT(url, opts = {}, ms = 7000) {
   finally { clearTimeout(t); }
 }
 
-async function geocode(q) {
-  const r = await fetchT("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&accept-language=pt-BR&q=" + encodeURIComponent(q));
-  if (!r.ok) throw new Error("geocode " + r.status);
+const UF = { AC:"Acre", AL:"Alagoas", AP:"Amapá", AM:"Amazonas", BA:"Bahia", CE:"Ceará", DF:"Distrito Federal",
+  ES:"Espírito Santo", GO:"Goiás", MA:"Maranhão", MT:"Mato Grosso", MS:"Mato Grosso do Sul", MG:"Minas Gerais",
+  PA:"Pará", PB:"Paraíba", PR:"Paraná", PE:"Pernambuco", PI:"Piauí", RJ:"Rio de Janeiro", RN:"Rio Grande do Norte",
+  RS:"Rio Grande do Sul", RO:"Rondônia", RR:"Roraima", SC:"Santa Catarina", SP:"São Paulo", SE:"Sergipe", TO:"Tocantins" };
+
+// "Castelo ES", "Castelo - ES", "Castelo, Espírito Santo" -> { city, state }
+function splitCity(q) {
+  const m = q.trim().match(/^(.*?)[\s,\-\/]+([A-Za-z]{2})$/);
+  if (m && UF[m[2].toUpperCase()]) return { city: m[1].trim(), state: UF[m[2].toUpperCase()] };
+  const parts = q.split(/\s*[,\-\/]\s*/);
+  if (parts.length > 1) return { city: parts[0], state: parts.slice(1).join(" ") };
+  return { city: q.trim(), state: "" };
+}
+
+async function nominatim(params) {
+  const r = await fetchT("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&accept-language=pt-BR&" + params, {}, 5000);
+  if (!r.ok) throw new Error("nominatim " + r.status);
   const j = await r.json();
-  if (!j.length) return null;
-  return { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name.split(",")[0] };
+  return j.length ? { lat: +j[0].lat, lon: +j[0].lon, label: j[0].display_name.split(",")[0] } : null;
+}
+async function photon(q) {
+  const r = await fetchT("https://photon.komoot.io/api/?limit=5&q=" + encodeURIComponent(q), {}, 5000);
+  if (!r.ok) throw new Error("photon " + r.status);
+  const j = await r.json();
+  const f = (j.features || []).find(f => f.properties && f.properties.countrycode === "BR");
+  return f ? { lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], label: f.properties.name } : null;
+}
+
+async function geocode(q) {
+  const { city, state } = splitCity(q);
+  const tries = [
+    () => state ? nominatim("city=" + encodeURIComponent(city) + "&state=" + encodeURIComponent(state)) : null,
+    () => nominatim("q=" + encodeURIComponent(state ? city + ", " + state : city)),
+    () => photon(state ? city + ", " + state + ", Brasil" : city + ", Brasil"),
+  ];
+  for (const t of tries) {
+    try { const g = await t(); if (g) return g; } catch (e) {}
+  }
+  return null;
 }
 
 function addrOf(t) {
@@ -69,7 +102,7 @@ export default async (req) => {
     const city = (u.searchParams.get("q") || "").trim();
     if (city) {
       const g = await geocode(city);
-      if (!g) return json({ error: "cidade_nao_encontrada" }, 404);
+      if (!g) return json({ error: "cidade_nao_encontrada" }, 404, "no-store");
       ({ lat, lon, label } = g);
     }
     if (!(Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) return json({ error: "local_invalido" }, 400, "no-store");
