@@ -158,6 +158,25 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .count{color:var(--muted);font-size:13px;margin:6px 0 4px}
 .results{list-style:none;margin:0;padding:0}
 .res{display:block;width:100%;text-align:left;padding:13px 0;border-bottom:1px solid var(--line)}
+.res-row{display:flex;align-items:flex-start;gap:6px;border-bottom:1px solid var(--line)}
+.res-row .res{flex:1;min-width:0;border-bottom:0}
+.res-sh{flex:none;width:42px;height:42px;margin-top:8px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.res-sh:active{background:var(--sel);color:var(--ink)}
+.sgroup{margin:14px 0 6px}
+.sgroup h3{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rubric);margin:0 0 8px}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.bcard .bc-top{display:flex;align-items:center;gap:12px}
+.bcard .bc-top div{flex:1;min-width:0}
+.bcard .bc-top b{display:block;font-size:17px;font-weight:600}
+.bcard .bc-top span{color:var(--muted);font-size:13px}
+.bcard .open{background:var(--rubric);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px;flex:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;min-width:38px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.blist2 button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line);text-align:left;font-size:16px}
+.blist2 button span{color:var(--muted);font-size:13px;white-space:nowrap}
+.share-all{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:10px 0 4px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px;font-weight:600}
+.tip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:9px 12px;color:var(--muted);font-size:13px;margin:4px 0 10px}
 .res b{display:block;color:var(--rubric);font-size:13px;font-weight:600;margin-bottom:3px}
 .res p{margin:0;font-family:var(--f-read);font-size:16px;line-height:1.55}
 .res mark{background:var(--hl-y);color:inherit;border-radius:3px;padding:0 1px}
@@ -278,6 +297,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
     </div></header>
     <main class="gut"><div class="wrap reader">
       <div class="chap-head"><div class="chap-num" id="r-num">1</div><div class="chap-book" id="r-book">Gênesis</div></div>
+      <div class="tip" id="r-tip" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>Toque nos versículos para selecionar e depois em <b>Enviar</b> para compartilhar.</span></div>
       <div class="text" id="r-text"></div>
       <div class="pager"><button id="p-prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"/></svg><span id="p-prev-l">Anterior</span></button>
         <button id="p-next"><span id="p-next-l">Próximo</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
@@ -289,11 +309,12 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
     <header class="top gut"><div class="wrap"><h1>Buscar</h1></div></header>
     <main class="gut"><div class="wrap">
       <div class="search-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Palavra ou frase, ex.: misericórdia" autocomplete="off" enterkeyhint="search"></div>
+        <input id="q" type="search" placeholder="Palavra, livro (Jo 3,16) ou autor (Paulo)" autocomplete="off" enterkeyhint="search"></div>
       <div class="filters" id="filters"><button data-f="all" aria-pressed="true">Toda a Bíblia</button><button data-f="AT" aria-pressed="false">Antigo Test.</button><button data-f="NT" aria-pressed="false">Novo Test.</button></div>
       <div class="count" id="count"></div>
+      <div id="s-top"></div>
       <ul class="results" id="results"></ul>
-      <div class="empty" id="s-empty"><strong>Procure na Escritura</strong>Digite ao menos 3 letras. A busca ignora acentos, então “misericordia” também encontra “misericórdia”.</div>
+      <div class="empty" id="s-empty"><strong>Procure na Escritura</strong>Busque por <b>palavra</b> (perdão), por <b>livro e capítulo</b> (João 3, Jo 3,16, Salmo 22) ou por <b>autor</b> (Paulo, Moisés, Davi, João). A busca ignora acentos.</div>
     </div></main>
   </section>
 
@@ -455,7 +476,8 @@ function refRange(b,c,vs){vs=[...vs].sort((x,y)=>x-y);const parts=[];let s=vs[0]
 /* ---------- leitura ---------- */
 function go(b,c,v,auto){if(!auto&&tts.on)ttsStop();st.b=b;st.c=c;store.set("b",b);store.set("c",c);renderChapter();show("read");
   if(v!=null){const el=document.querySelector('.v[data-i="'+v+'"]');if(el){setTimeout(()=>{el.scrollIntoView({block:"center"});el.classList.add("flash")},30)}}}
-function renderChapter(){
+let tipN=store.get("tipN",0);
+function renderChapter(){if(tipN<3){$("#r-tip").hidden=false;tipN++;store.set("tipN",tipN)}else $("#r-tip").hidden=true;
   const bk=B[st.b],ch=bk.c[st.c];clearSel();
   $("#r-title").textContent=name(st.b,st.c);$("#r-num").textContent=st.c+1;$("#r-book").textContent=bk.id==="PSA"?"Salmo":bk.n;
   const frag=document.createDocumentFragment();
@@ -537,17 +559,91 @@ $("#filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;filt=b
 $("#q").addEventListener("input",()=>{clearTimeout(qt);qt=setTimeout(runSearch,220)});
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function highlight(t,nq){const n=norm(t);let out="",i=0,j;while((j=n.indexOf(nq,i))>-1){out+=esc(t.slice(i,j))+"<mark>"+esc(t.slice(j,j+nq.length))+"</mark>";i=j+nq.length}return out+esc(t.slice(i))}
-function runSearch(){const q=$("#q").value.trim(),ul=$("#results");ul.textContent="";
-  if(!B||q.length<3){$("#count").textContent="";$("#s-empty").hidden=false;return}
-  if(!NORM)buildNorm();const nq=norm(q);let n=0;const LIM=300,frag=document.createDocumentFragment();
-  for(let b=0;b<B.length;b++){if(filt!=="all"&&B[b].t!==filt)continue;const C=NORM[b];
-    for(let c=0;c<C.length;c++)for(let v=0;v<C[c].length;v++){if(C[c][v].includes(nq)){n++;
-      if(n<=LIM){const li=document.createElement("li"),bt=document.createElement("button");bt.className="res";
-        bt.innerHTML="<b>"+esc(B[b].n+" "+(c+1)+","+(v+1))+"</b><p>"+highlight(B[b].c[c][v],nq)+"</p>";
-        bt.onclick=()=>go(b,c,v);li.append(bt);frag.append(li)}}}}
-  ul.append(frag);$("#s-empty").hidden=n>0;
-  if(!n){$("#s-empty").innerHTML="<strong>Nada encontrado</strong>Tente outra palavra ou uma forma mais curta, como “perdo” para perdão e perdoar."}
-  $("#count").textContent=n?(n.toLocaleString("pt-BR")+(n===1?" versículo":" versículos")+(n>LIM?" · mostrando os "+LIM+" primeiros":"")):"";}
+const SHARE_IC='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
+/* autores segundo a tradição da Igreja */
+const AUTHORS=[
+ ["Moisés",["GEN","EXO","LEV","NUM","DEU"]],["Josué",["JOS"]],["Samuel",["JDG","RUT","1SA"]],["Esdras",["1CH","2CH","EZR"]],["Neemias",["NEH"]],
+ ["Davi",["PSA"]],["Salomão",["PRO","ECC","SNG","WIS"]],["Jesus Ben Sirac",["SIR"]],
+ ["Isaías",["ISA"]],["Jeremias",["JER","LAM"]],["Baruc",["BAR"]],["Ezequiel",["EZE"]],["Daniel",["DAN"]],["Oseias",["HOS"]],["Joel",["JOE"]],
+ ["Amós",["AMO"]],["Abdias",["OBA"]],["Jonas",["JON"]],["Miqueias",["MIC"]],["Naum",["NAH"]],["Habacuc",["HAB"]],["Sofonias",["ZEP"]],
+ ["Ageu",["HAG"]],["Zacarias",["ZEC"]],["Malaquias",["MAL"]],
+ ["Mateus",["MAT"]],["Marcos",["MRK"]],["Lucas",["LUK","ACT"]],["João",["JHN","1JN","2JN","3JN","REV"]],
+ ["Paulo",["ROM","1CO","2CO","GAL","EPH","PHP","COL","1TH","2TH","1TI","2TI","TIT","PHM","HEB"]],
+ ["Tiago",["JAS"]],["Pedro",["1PE","2PE"]],["Judas",["JUD"]]];
+const AUTH_ALIAS={"sirac":"Jesus Ben Sirac","ben sirac":"Jesus Ben Sirac","sirácida":"Jesus Ben Sirac","rei davi":"Davi","rei salomao":"Salomão"};
+const authorOf=id=>{const a=AUTHORS.find(x=>x[1].includes(id));return a?a[0]:""};
+const BOOK_ALIAS={"salmo":"PSA","sl":"PSA","salmos":"PSA","cantico":"SNG","canticos":"SNG","cantares":"SNG","canticodoscanticos":"SNG",
+ "eclesiastico":"SIR","siracida":"SIR","sirac":"SIR","apocalipse":"REV","ap":"REV","atos":"ACT","at":"ACT","evangelho":null};
+let BKEYS=null;
+function buildKeys(){BKEYS=[];B.forEach((b,i)=>{const k1=norm(b.n).replace(/[^a-z0-9]/g,""),k2=norm(b.a).replace(/[^a-z0-9]/g,"");BKEYS.push([k1,i],[k2,i])});
+  Object.entries(BOOK_ALIAS).forEach(([k,id])=>{if(id)BKEYS.push([k,IDX[id]])})}
+function findBook(raw){if(!BKEYS)buildKeys();
+  if(/^\s*j[óo]\s*$/i.test(raw)||/^\s*job\s*$/i.test(raw))return /ó/i.test(raw)||/job/i.test(raw)?IDX.JOB:IDX.JHN;
+  let k=norm(raw).replace(/^(sao|s\.|santo|evangelho de|evangelho segundo|livro de|livro do|livro dos|carta aos|carta a|carta de)\s+/,"")
+    .replace(/^(iii|ii|i)\s+/,m=>({"iii ":"3","ii ":"2","i ":"1"})[m]).replace(/[^a-z0-9]/g,"");
+  if(!k)return -1;
+  const ex=BKEYS.find(x=>x[0]===k);if(ex)return ex[1];
+  if(k.length>=3){const pre=BKEYS.find(x=>x[0].startsWith(k));if(pre)return pre[1]}
+  return -1}
+/* "João 3", "Jo 3,16", "Mt 5:3-10", "1 Coríntios 13", "Salmo 22" */
+function parseRef(q){const m=q.toLowerCase().trim().match(/^((?:[123]|iii|ii|i)?\s*[a-zà-ú][a-zà-ú.\s]*?)\s*(\d{1,3})?(?:\s*[,:.]\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?)?$/);
+  if(!m)return null;const bi=findBook(m[1]);if(bi<0)return null;
+  const r={b:bi};if(m[2]){r.c=Math.min(+m[2],B[bi].c.length)-1;if(m[3]){const n=B[bi].c[r.c].length;r.v1=Math.min(+m[3],n)-1;r.v2=m[4]?Math.min(Math.max(+m[4],+m[3]),n)-1:r.v1}}
+  return r}
+function findAuthor(q){let k=norm(q).trim().replace(/^(sao|s\.|santo|apostolo|profeta|rei|o|evangelista)\s+/,"");
+  if(k.length<3)return null;
+  const al=Object.entries(AUTH_ALIAS).find(([x])=>norm(x)===k);if(al)return AUTHORS.find(a=>a[0]===al[1]);
+  return AUTHORS.find(a=>norm(a[0])===k)||(k.length>=4?AUTHORS.find(a=>norm(a[0]).startsWith(k)):null)}
+
+function verseRow(b,c,v,html){const li=document.createElement("li");li.className="res-row";
+  const bt=document.createElement("button");bt.className="res";
+  bt.innerHTML="<b>"+esc(B[b].n+" "+(c+1)+","+(v+1))+"</b><p>"+(html!=null?html:esc(B[b].c[c][v]))+"</p>";
+  bt.onclick=()=>go(b,c,v);
+  const sh=document.createElement("button");sh.className="res-sh";sh.setAttribute("aria-label","Compartilhar");sh.innerHTML=SHARE_IC;
+  sh.onclick=e=>{e.stopPropagation();share("“"+B[b].c[c][v]+"” ("+B[b].a+" "+(c+1)+","+(v+1)+")")};
+  li.append(bt,sh);return li}
+function bookCard(bi,openC){const bk=B[bi],au=authorOf(bk.id);const d=document.createElement("div");d.className="bcard";
+  d.innerHTML='<div class="bc-top"><div><b></b><span></span></div><button class="open">Abrir</button></div><div class="chips"></div>';
+  d.querySelector("b").textContent=bk.n;d.querySelector(".bc-top span").textContent=(au?"Autor: "+au+" · ":"")+bk.c.length+(bk.c.length===1?" capítulo":" capítulos");
+  d.querySelector(".open").onclick=()=>go(bi,openC||0);
+  const ch=d.querySelector(".chips");if(bk.c.length>1)bk.c.forEach((_,c)=>{const x=document.createElement("button");x.textContent=c+1;x.onclick=()=>go(bi,c);ch.append(x)});else ch.remove();
+  return d}
+function group(title){const g=document.createElement("div");g.className="sgroup";const h=document.createElement("h3");h.textContent=title;g.append(h);return g}
+
+function runSearch(){const q=$("#q").value.trim(),ul=$("#results"),top=$("#s-top");ul.textContent="";top.textContent="";
+  if(!B||q.length<2){$("#count").textContent="";$("#s-empty").hidden=false;return}
+  let anyTop=false,skipWords=false;
+  // 1) referência: livro, capítulo, versículos
+  const ref=parseRef(q);
+  if(ref){anyTop=true;const bk=B[ref.b];
+    if(ref.c==null){const g=group("Livro");g.append(bookCard(ref.b));top.append(g)}
+    else{const g=group("Passagem");const card=bookCard(ref.b,ref.c);card.querySelector("b").textContent=name(ref.b,ref.c);
+      card.querySelector(".open").textContent="Ler capítulo";card.querySelector(".chips")?.remove();g.append(card);
+      if(ref.v1!=null){const list=document.createElement("ul");list.className="results";
+        for(let v=ref.v1;v<=ref.v2;v++)list.append(verseRow(ref.b,ref.c,v));g.append(list);
+        if(ref.v2>ref.v1){const sa=document.createElement("button");sa.className="share-all";sa.innerHTML=SHARE_IC+"Compartilhar trecho";
+          sa.onclick=()=>{const vs=[];for(let v=ref.v1;v<=ref.v2;v++)vs.push(v);share("“"+vs.map(v=>bk.c[ref.c][v]).join(" ")+"” ("+refRange(ref.b,ref.c,vs)+")")};g.append(sa)}}
+      top.append(g);skipWords=true}}
+  // 2) autor
+  const au=(!ref||ref.c==null)?findAuthor(q):null;
+  if(au){anyTop=true;const g=group(au[0]==="Jesus Ben Sirac"?"Livro de Jesus Ben Sirac":"Livros de "+au[0]+" · pela tradição");
+    const ul2=document.createElement("ul");ul2.className="blist2";ul2.style.cssText="list-style:none;margin:0;padding:0";
+    au[1].forEach(id=>{const bi=IDX[id];if(ref&&ref.b===bi)return;const li=document.createElement("li"),bt=document.createElement("button");
+      bt.innerHTML="<div></div><span></span>";bt.firstChild.textContent=B[bi].n;bt.lastChild.textContent=B[bi].c.length+" cap.";bt.onclick=()=>go(bi,0);li.append(bt);ul2.append(li)});
+    if(ul2.children.length){g.append(ul2);top.append(g)}}
+  // 3) palavras
+  let n=0;
+  if(!skipWords&&q.length>=3){if(!NORM)buildNorm();const nq=norm(q);const LIM=300,frag=document.createDocumentFragment();
+    for(let b=0;b<B.length;b++){if(filt!=="all"&&B[b].t!==filt)continue;const C=NORM[b];
+      for(let c=0;c<C.length;c++)for(let v=0;v<C[c].length;v++){if(C[c][v].includes(nq)){n++;
+        if(n<=LIM)frag.append(verseRow(b,c,v,highlight(B[b].c[c][v],nq)))}}}
+    if(n&&anyTop){const h=group("Versículos com “"+q+"” · "+n.toLocaleString("pt-BR"));top.append(h)}
+    ul.append(frag);
+    $("#count").textContent=n?(n.toLocaleString("pt-BR")+(n===1?" versículo":" versículos")+(n>LIM?" · mostrando os "+LIM+" primeiros":"")):"";}
+  else $("#count").textContent="";
+  if(anyTop)$("#count").textContent="";
+  $("#s-empty").hidden=n>0||anyTop;
+  if(!n&&!anyTop)$("#s-empty").innerHTML="<strong>Nada encontrado</strong>Tente outra palavra ou uma forma mais curta (“perdo” acha perdão e perdoar), um livro (“Jo 3,16”) ou um autor (“Paulo”).";}
 
 /* ---------- salvos ---------- */
 let svTab="fav";
