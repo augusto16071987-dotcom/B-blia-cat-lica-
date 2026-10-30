@@ -1065,17 +1065,18 @@ function roKeyText(){if(ro.i>=RS.length)return null;const S=RS[ro.i],M=MYS[ro.se
 function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
 function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText();if(!kt)return;
   if(tts.on)ttsStop();const my=roSpeakId;const st=t=>{if(my===roSpeakId)$("#ro-aud-st").textContent=t};
-  const done=()=>st("Terminou · toque em Avançar");
+  const t0=Date.now();let eng="";
+  const done=()=>{const sec=Math.round((Date.now()-t0)/1000);st(sec<2?"A voz "+eng+" terminou sem falar · veja o volume de mídia":"Terminou ("+eng+", "+sec+" s) · toque em Avançar")};
   let fell=false;
   const viaPhone=why=>{if(fell||my!==roSpeakId)return;fell=true;
     if(!SYN){st(why?why+" · sem voz no celular":"Este celular não tem voz para leitura");return}
-    st((why?why+" · ":"")+"lendo com a voz do celular…");
+    eng="do celular";st((why?why+" · ":"")+"lendo com a voz do celular…");
     // o Chrome do Android às vezes ignora uma fala logo depois de cancelar a anterior: espera um pouco
     setTimeout(()=>{if(my!==roSpeakId)return;const u=utter(kt.text);let started=false;
       u.onstart=()=>{started=true;st("Lendo: "+$("#ro-title").textContent+"…")};u.onend=done;u.onerror=e=>st("A voz do celular falhou ("+(e.error||"erro")+")");
       SYN.speak(u);setTimeout(()=>{if(!started&&my===roSpeakId&&!SYN.speaking)st("A voz do celular não respondeu · veja Ajustes › Voz")},4000)},150)};
   if(!appSelected()){viaPhone();return}
-  st("Carregando a voz…");
+  eng="do app";st("Carregando a voz do app…");
   fetch(API+"?prayer="+encodeURIComponent(kt.key)+vq()).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(blob=>{
     if(my!==roSpeakId)return;if(roAU._u)URL.revokeObjectURL(roAU._u);roAU._u=URL.createObjectURL(blob);roAU.src=roAU._u;roAU.playbackRate=tts.rate;
     roAU.onended=done;roAU.onerror=()=>viaPhone("Voz do app falhou");
