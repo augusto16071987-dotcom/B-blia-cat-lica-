@@ -31,6 +31,30 @@ async function pickVoice(req) {
   return list.some(v => v.name === req) ? req : VOICE;
 }
 
+
+// Orações do terço (as mesmas do app). Só estas chaves podem ser lidas, para evitar uso indevido.
+const OR = {
+ sinal:["Sinal da Cruz","Pelo sinal da Santa Cruz, livrai-nos, Deus, nosso Senhor, dos nossos inimigos.\nEm nome do Pai, e do Filho, e do Espírito Santo. Amém."],
+ creio:["Creio","Creio em Deus Pai todo-poderoso, criador do céu e da terra; e em Jesus Cristo, seu único Filho, nosso Senhor; que foi concebido pelo poder do Espírito Santo; nasceu da Virgem Maria; padeceu sob Pôncio Pilatos, foi crucificado, morto e sepultado; desceu à mansão dos mortos; ressuscitou ao terceiro dia; subiu aos céus; está sentado à direita de Deus Pai todo-poderoso, donde há de vir a julgar os vivos e os mortos.\nCreio no Espírito Santo, na santa Igreja Católica, na comunhão dos santos, na remissão dos pecados, na ressurreição da carne, na vida eterna. Amém."],
+ pai:["Pai Nosso","Pai nosso que estais nos céus, santificado seja o vosso nome; venha a nós o vosso reino; seja feita a vossa vontade, assim na terra como no céu.\nO pão nosso de cada dia nos dai hoje; perdoai-nos as nossas ofensas, assim como nós perdoamos a quem nos tem ofendido; e não nos deixeis cair em tentação, mas livrai-nos do mal. Amém."],
+ ave:["Ave Maria","Ave Maria, cheia de graça, o Senhor é convosco; bendita sois vós entre as mulheres, e bendito é o fruto do vosso ventre, Jesus.\nSanta Maria, Mãe de Deus, rogai por nós, pecadores, agora e na hora de nossa morte. Amém."],
+ gloria:["Glória ao Pai","Glória ao Pai, ao Filho e ao Espírito Santo.\nComo era no princípio, agora e sempre. Amém."],
+ jesus:["Ó meu Jesus","Ó meu Jesus, perdoai-nos, livrai-nos do fogo do inferno; levai as almas todas para o céu e socorrei principalmente as que mais precisarem."],
+ salve:["Salve Rainha","Salve, Rainha, Mãe de misericórdia, vida, doçura e esperança nossa, salve! A vós bradamos, os degredados filhos de Eva; a vós suspiramos, gemendo e chorando neste vale de lágrimas. Eia, pois, advogada nossa, esses vossos olhos misericordiosos a nós volvei; e, depois deste desterro, mostrai-nos Jesus, bendito fruto do vosso ventre, ó clemente, ó piedosa, ó doce sempre Virgem Maria.\nV. Rogai por nós, santa Mãe de Deus.\nR. Para que sejamos dignos das promessas de Cristo. Amém."]};
+const MYS = {
+ gozosos:{n:"Gozosos",dias:"segunda e sábado",m:[["A Anunciação do Anjo a Nossa Senhora","LUK",1,26,38,38],["A Visitação de Nossa Senhora a Santa Isabel","LUK",1,39,56,42],["O Nascimento de Jesus em Belém","LUK",2,1,20,7],["A Apresentação do Menino Jesus no Templo","LUK",2,22,38,30],["O Encontro do Menino Jesus no Templo","LUK",2,41,52,49]]},
+ luminosos:{n:"Luminosos",dias:"quinta-feira",m:[["O Batismo de Jesus no rio Jordão","MAT",3,13,17,17],["A autorrevelação de Jesus nas Bodas de Caná","JHN",2,1,12,5],["O Anúncio do Reino de Deus e o convite à conversão","MRK",1,14,15,15],["A Transfiguração de Jesus","LUK",9,28,36,35],["A Instituição da Eucaristia","LUK",22,14,20,19]]},
+ dolorosos:{n:"Dolorosos",dias:"terça e sexta",m:[["A Agonia de Jesus no Horto das Oliveiras","LUK",22,39,46,42],["A Flagelação de Jesus","JHN",19,1,1,1],["A Coroação de espinhos","MAT",27,27,31,29],["Jesus carrega a Cruz até o Calvário","JHN",19,16,17,17],["A Crucifixão e Morte de Jesus","LUK",23,33,46,46]]},
+ gloriosos:{n:"Gloriosos",dias:"quarta e domingo",m:[["A Ressurreição de Jesus","MAT",28,1,10,6],["A Ascensão de Jesus ao Céu","ACT",1,6,11,9],["A Vinda do Espírito Santo sobre Maria e os Apóstolos","ACT",2,1,4,4],["A Assunção de Nossa Senhora ao Céu","LUK",1,46,49,48],["A Coroação de Nossa Senhora como Rainha do céu e da terra","REV",12,1,1,1]]}};
+const ORDW = ["Primeiro", "Segundo", "Terceiro", "Quarto", "Quinto"];
+function prayerText(key) {
+  let m = key.match(/^p-(\w+)$/);
+  if (m && OR[m[1]]) return OR[m[1]][1].replace(/^V\. |\nV\. |\nR\. /g, " ").replace(/\n/g, " ");
+  m = key.match(/^m-(\w+)-([1-5])$/);
+  if (m && MYS[m[1]]) { const set = MYS[m[1]], i = +m[2]; return `${ORDW[i - 1]} Mistério ${set.n.replace(/s$/, "")}. ${set.m[i - 1][0]}.`; }
+  return null;
+}
+
 let BIBLE = null;
 async function bible(origin) {
   if (!BIBLE) {
@@ -129,6 +153,22 @@ export default async (req) => {
     const voice = KEY ? await pickVoice(url.searchParams.get("voice")) : VOICE;
     const style = url.searchParams.get("style") === "narrador" ? "narrador" : "normal";
     const vkey = style === "normal" ? voice : `${voice}~${style}`;
+
+    // Orações do terço
+    const pk = url.searchParams.get("prayer");
+    if (pk) {
+      const txt = prayerText(pk);
+      if (!txt) return json({ error: "oracao_invalida" }, 400, "no-store");
+      const k = `${vkey}/oracao/${pk}.mp3`;
+      let buf = await store.get(k, { type: "arrayBuffer" });
+      if (!buf) {
+        if (!KEY) return json({ error: "sem_chave" }, 503, "no-store");
+        const r = await synth("<speak>" + esc(txt) + "</speak>", voice, style);
+        await store.set(k, r.audio);
+        buf = r.audio;
+      }
+      return mp3(buf);
+    }
 
     // Amostra para o botão "Ouvir" na escolha de voz
     if (url.searchParams.has("sample")) {
