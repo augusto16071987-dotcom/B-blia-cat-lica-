@@ -1081,7 +1081,7 @@ function roHiShow(k){const h=roHi;if(!h||k===h.last)return;h.last=k;const el=h.e
   const w=h.ws[k];const d=document.createElement("span");d.className="done";d.textContent=h.T.slice(0,w.s);
   const mk=document.createElement("mark");mk.className="w";mk.textContent=h.T.slice(w.s,w.e);el.append(d,mk,h.T.slice(w.e))}
 function roHiAt(x){const h=roHi;if(!h)return;let k=-1;for(let i=0;i<h.ws.length;i++){if(h.ws[i].a<=x)k=i;else break}roHiShow(k)}
-function roHiClear(){if(roHi){roHi.el.textContent=roHi.T;roHi.el.classList.remove("ro-hl")}roHi=null}
+function roHiClear(){if(roHi){if(roHi.el.querySelector(".done,mark.w"))roHi.el.textContent=roHi.T;roHi.el.classList.remove("ro-hl")}roHi=null}
 function roHiTick(my){const f=()=>{if(my!==roSpeakId||!roHi)return;const d=roAU.duration;
     if(isFinite(d)&&d>0&&!roAU.paused){roHiAt(Math.min(1,roAU.currentTime/Math.max(.3,d-.35))*roHi.total)}
     requestAnimationFrame(f)};requestAnimationFrame(f)}
