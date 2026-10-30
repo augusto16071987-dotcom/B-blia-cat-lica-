@@ -1064,17 +1064,29 @@ function roKeyText(){if(ro.i>=RS.length)return null;const S=RS[ro.i],M=MYS[ro.se
   return {key:"p-"+S.key,text:OR[S.key][1].replace(/^V\. |\nV\. |\nR\. /g," ").replace(/\n/g," ")}}
 function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
 function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText();if(!kt)return;
-  if(tts.on)ttsStop();const my=roSpeakId;$("#ro-aud-st").textContent="Lendo: "+$("#ro-title").textContent+"…";
-  const done=()=>{if(my===roSpeakId)$("#ro-aud-st").textContent="Terminou · toque em Avançar"};
-  let fell=false;const viaPhone=()=>{if(fell)return;fell=true;if(!SYN||my!==roSpeakId){done();return}const u=utter(kt.text);u.onend=done;u.onerror=done;SYN.speak(u)};
-  if(appSelected()){roAU.src=API+"?prayer="+encodeURIComponent(kt.key)+vq();roAU.playbackRate=tts.rate;
-    roAU.onended=done;roAU.onerror=()=>{if(my===roSpeakId)viaPhone()};roAU.play().catch(()=>{if(my===roSpeakId)viaPhone()})}
-  else viaPhone()}
+  if(tts.on)ttsStop();const my=roSpeakId;const st=t=>{if(my===roSpeakId)$("#ro-aud-st").textContent=t};
+  const done=()=>st("Terminou · toque em Avançar");
+  let fell=false;
+  const viaPhone=why=>{if(fell||my!==roSpeakId)return;fell=true;
+    if(!SYN){st(why?why+" · sem voz no celular":"Este celular não tem voz para leitura");return}
+    st((why?why+" · ":"")+"lendo com a voz do celular…");
+    // o Chrome do Android às vezes ignora uma fala logo depois de cancelar a anterior: espera um pouco
+    setTimeout(()=>{if(my!==roSpeakId)return;const u=utter(kt.text);let started=false;
+      u.onstart=()=>{started=true;st("Lendo: "+$("#ro-title").textContent+"…")};u.onend=done;u.onerror=e=>st("A voz do celular falhou ("+(e.error||"erro")+")");
+      SYN.speak(u);setTimeout(()=>{if(!started&&my===roSpeakId&&!SYN.speaking)st("A voz do celular não respondeu · veja Ajustes › Voz")},4000)},150)};
+  if(!appSelected()){viaPhone();return}
+  st("Carregando a voz…");
+  fetch(API+"?prayer="+encodeURIComponent(kt.key)+vq()).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(blob=>{
+    if(my!==roSpeakId)return;if(roAU._u)URL.revokeObjectURL(roAU._u);roAU._u=URL.createObjectURL(blob);roAU.src=roAU._u;roAU.playbackRate=tts.rate;
+    roAU.onended=done;roAU.onerror=()=>viaPhone("Voz do app falhou");
+    return roAU.play().then(()=>st("Lendo: "+$("#ro-title").textContent+"…"))}).catch(e=>viaPhone("Voz do app indisponível ("+(e&&e.message||"erro")+")"))}
 $("#ro-aud").checked=roAud;$(".ro-audio").classList.toggle("on",roAud);
-$("#ro-aud").onchange=e=>{roAud=e.target.checked;store.set("roAudio",roAud);$(".ro-audio").classList.toggle("on",roAud);if(roAud)roSpeak();else roStop()};
+$("#ro-aud").onchange=e=>{roAud=e.target.checked;roUnlock();store.set("roAudio",roAud);$(".ro-audio").classList.toggle("on",roAud);if(roAud)roSpeak();else roStop()};
 function roMove(k){if(ro.i>=RS.length&&k>0){ro.i=0}else ro.i=Math.max(0,Math.min(RS.length,ro.i+k));saveRo();paintRosary();
 }
-$("#ro-next").onclick=()=>{roMove(1);roSpeak()};$("#ro-prev").onclick=()=>{roMove(-1);roSpeak()};
+const SILENT="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+function roUnlock(){if(!roAud||roAU._ok)return;try{roAU.src=SILENT;const p=roAU.play();if(p)p.then(()=>{roAU._ok=true}).catch(()=>{})}catch(e){}}
+$("#ro-next").onclick=()=>{roUnlock();roMove(1);roSpeak()};$("#ro-prev").onclick=()=>{roUnlock();roMove(-1);roSpeak()};
 $("#ro-restart").onclick=()=>{ro.i=0;saveRo();paintRosary();roSpeak();toast("Terço recomeçado")};
 function paintRosaryHome(){const k=todaySet();$("#ro-home-sub").textContent="Hoje: Mistérios "+MYS[k].n+(ro.i>0&&ro.i<RS.length?" · continuar de onde parou":"")}
 $("#open-rosary").onclick=()=>{if(!$("#ro-svg").childElementCount)drawRosary();paintRosary();nav("rosary")};
