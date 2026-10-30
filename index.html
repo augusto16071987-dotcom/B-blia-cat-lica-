@@ -250,8 +250,34 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .ro-prev{width:56px;flex:none;border:1px solid var(--line);border-radius:14px;background:var(--surface);display:grid;place-items:center}
 .ro-prev[disabled]{opacity:.35}
 .ro-next{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--rubric);color:var(--on-accent);border-radius:14px;padding:16px;font-weight:700;font-size:17px}
+.ro-audio{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-top:8px;cursor:pointer}
+.ro-audio input{width:24px;height:24px;accent-color:var(--rubric);flex:none;margin:0}
+.ro-aud-ic{color:var(--rubric);display:grid;place-items:center}
+.ro-aud-t{flex:1;min-width:0}.ro-aud-t b{display:block;font-size:15.5px;font-weight:600}.ro-aud-t span{color:var(--muted);font-size:13px}
+.ro-audio.on{border-color:var(--rubric);box-shadow:0 0 0 1px var(--rubric) inset}
 .ro-prog{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin:14px 0 4px}
 .ro-prog i{display:block;height:100%;background:var(--rubric);width:0;transition:width .3s}
+
+/* doutrina */
+.doc-list{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.doc-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}
+.doc-row:last-child{border-bottom:0}
+.doc-row:active{background:var(--sel)}
+.doc-n{width:46px;height:46px;border-radius:12px;flex:none;display:grid;place-items:center;font-family:var(--f-display);font-size:21px;font-weight:600;color:var(--rubric);background:color-mix(in srgb,var(--rubric) 11%,transparent)}
+.doc-t{flex:1;min-width:0}.doc-t b{display:block;font-size:16px;font-weight:600}.doc-t span{color:var(--muted);font-size:13px}
+.doc-intro{font-family:var(--f-read);font-size:17px;line-height:1.6;color:var(--muted);margin:18px 0 6px}
+.doc-group{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rubric);margin:22px 0 8px}
+.doc-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.doc-item{display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.doc-item .num{font-family:var(--f-display);font-size:26px;line-height:1;color:var(--rubric);width:30px;flex:none;text-align:center;font-weight:600;padding-top:2px}
+.doc-item .body{flex:1;min-width:0}
+.doc-item h3{margin:0;font-family:var(--f-read);font-size:calc(var(--fs) * .98);font-weight:600;line-height:1.35}
+.doc-item p{margin:6px 0 0;color:var(--muted);font-size:14.5px;line-height:1.5}
+.doc-refs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.doc-refs button{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--rubric);background:var(--bg)}
+.doc-quote{margin:22px 0 4px;padding:14px 16px;border-left:3px solid var(--rubric);background:var(--sel);border-radius:0 12px 12px 0;font-family:var(--f-read);font-size:16.5px;line-height:1.6}
+.doc-quote cite{display:block;font-style:normal;font-weight:600;color:var(--rubric);font-size:13px;margin-top:6px;font-family:var(--f-ui)}
+.doc-src{color:var(--muted);font-size:12.5px;margin:18px 0 8px;line-height:1.5}
 
 /* ajustes */
 .set{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 16px;margin-top:10px}
@@ -396,6 +422,12 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       <button class="church-cta" id="open-rosary"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="6"/><circle cx="12" cy="2.5" r="1" fill="currentColor"/><circle cx="17.2" cy="5.5" r="1" fill="currentColor"/><circle cx="17.2" cy="11.5" r="1" fill="currentColor"/><circle cx="6.8" cy="5.5" r="1" fill="currentColor"/><circle cx="6.8" cy="11.5" r="1" fill="currentColor"/><path d="M12 14.5v3M10.3 19.5h3.4M12 17.5v5"/></svg></div>
         <div class="t"><b>Rezar o Terço</b><span id="ro-home-sub">Mistérios do dia</span></div>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
+      <div class="eyebrow">Doutrina da Igreja</div>
+      <div class="doc-list">
+        <button class="doc-row" data-doc="mand"><span class="doc-n">10</span><span class="doc-t"><b>Os Dez Mandamentos</b><span>A Lei de Deus</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button class="doc-row" data-doc="igreja"><span class="doc-n">5</span><span class="doc-t"><b>Mandamentos da Igreja</b><span>Os deveres do católico</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button class="doc-row" data-doc="sacr"><span class="doc-n">7</span><span class="doc-t"><b>Os Sete Sacramentos</b><span>Sinais da graça de Deus</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
       <div class="eyebrow">Continuar lendo</div>
       <button class="continue" id="cont"><div class="big" id="cont-n">1</div><div class="t"><b id="cont-b">Gênesis</b><span id="cont-s"></span></div>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -480,6 +512,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       <button class="icon-btn" id="ro-restart" aria-label="Recomeçar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div></header>
     <main class="gut"><div class="wrap">
       <div class="ro-sets" id="ro-sets"></div>
+      <label class="ro-audio tts-only" for="ro-aud"><input type="checkbox" id="ro-aud"><span class="ro-aud-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ro-aud-t"><b>Ouvir as orações</b><span id="ro-aud-st">Lê em voz alta cada oração ao avançar</span></span></label>
       <div class="ro-stage">
         <svg id="ro-svg" viewBox="0 0 300 440" role="img" aria-label="Terço"></svg>
         <div class="ro-name" id="ro-name"></div>
@@ -497,6 +530,12 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       </div>
       <div class="ro-prog"><i id="ro-bar"></i></div>
     </div></main>
+  </section>
+
+  <!-- DOUTRINA -->
+  <section class="view" id="v-doc" hidden>
+    <header class="top gut"><div class="wrap"><button class="icon-btn back-btn" aria-label="Voltar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button><h1 id="doc-h">Doutrina</h1></div></header>
+    <main class="gut"><div class="wrap" id="doc-body"></div></main>
   </section>
 
   <!-- AJUSTES -->
@@ -629,7 +668,7 @@ let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on
 
 /* ---------- navegação ---------- */
 let view="home";
-function show(v){view=v;$$(".view").forEach(s=>s.hidden=s.id!=="v-"+v);
+function show(v){if(v!=="rosary"&&view==="rosary"&&typeof roStop==="function")roStop();view=v;$$(".view").forEach(s=>s.hidden=s.id!=="v-"+v);
   $$(".tab").forEach(t=>t.setAttribute("aria-current",String(t.dataset.v===v)));
   if(v!=="read")clearSel();
   if(v==="saved")renderSaved();
@@ -1017,13 +1056,84 @@ function paintRosary(){
   if(S.extra&&S.extra.of)cnt.innerHTML="<b>"+S.extra.n+"</b><span>de "+S.extra.of+"</span>";
   else if(d)cnt.innerHTML="<b>"+d+"º</b><span>mistério</span>";
   else cnt.innerHTML="<b>✠</b><span>"+(S.step==="Encerramento"?"fim":"início")+"</span>"}
+/* ouvir as orações */
+let roAud=store.get("roAudio",false);const roAU=new Audio();let roSpeakId=0;
+const ORDW=["Primeiro","Segundo","Terceiro","Quarto","Quinto"];
+function roKeyText(){if(ro.i>=RS.length)return null;const S=RS[ro.i],M=MYS[ro.set];
+  if(S.key==="mist"){const d=S.extra.d;return {key:"m-"+ro.set+"-"+d,text:ORDW[d-1]+" Mistério "+M.n.replace(/s$/,"")+". "+M.m[d-1][0]+"."}}
+  return {key:"p-"+S.key,text:OR[S.key][1].replace(/^V\. |\nV\. |\nR\. /g," ").replace(/\n/g," ")}}
+function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
+function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText();if(!kt)return;
+  if(tts.on)ttsStop();const my=roSpeakId;$("#ro-aud-st").textContent="Lendo: "+$("#ro-title").textContent+"…";
+  const done=()=>{if(my===roSpeakId)$("#ro-aud-st").textContent="Terminou · toque em Avançar"};
+  let fell=false;const viaPhone=()=>{if(fell)return;fell=true;if(!SYN||my!==roSpeakId){done();return}const u=utter(kt.text);u.onend=done;u.onerror=done;SYN.speak(u)};
+  if(appSelected()){roAU.src=API+"?prayer="+encodeURIComponent(kt.key)+vq();roAU.playbackRate=tts.rate;
+    roAU.onended=done;roAU.onerror=()=>{if(my===roSpeakId)viaPhone()};roAU.play().catch(()=>{if(my===roSpeakId)viaPhone()})}
+  else viaPhone()}
+$("#ro-aud").checked=roAud;$(".ro-audio").classList.toggle("on",roAud);
+$("#ro-aud").onchange=e=>{roAud=e.target.checked;store.set("roAudio",roAud);$(".ro-audio").classList.toggle("on",roAud);if(roAud)roSpeak();else roStop()};
 function roMove(k){if(ro.i>=RS.length&&k>0){ro.i=0}else ro.i=Math.max(0,Math.min(RS.length,ro.i+k));saveRo();paintRosary();
 }
-$("#ro-next").onclick=()=>roMove(1);$("#ro-prev").onclick=()=>roMove(-1);
-$("#ro-restart").onclick=()=>{ro.i=0;saveRo();paintRosary();toast("Terço recomeçado")};
+$("#ro-next").onclick=()=>{roMove(1);roSpeak()};$("#ro-prev").onclick=()=>{roMove(-1);roSpeak()};
+$("#ro-restart").onclick=()=>{ro.i=0;saveRo();paintRosary();roSpeak();toast("Terço recomeçado")};
 function paintRosaryHome(){const k=todaySet();$("#ro-home-sub").textContent="Hoje: Mistérios "+MYS[k].n+(ro.i>0&&ro.i<RS.length?" · continuar de onde parou":"")}
 $("#open-rosary").onclick=()=>{if(!$("#ro-svg").childElementCount)drawRosary();paintRosary();nav("rosary")};
 paintRosaryHome();
+
+/* ---------- doutrina: mandamentos e sacramentos ---------- */
+const DOCS={
+ mand:{t:"Os Dez Mandamentos",intro:"Deus deu a sua Lei a Moisés no monte Sinai. A Igreja ensina os mandamentos nesta fórmula, para guardá-los no coração.",
+  groups:[{g:"Amor a Deus",items:[
+   ["Amar a Deus sobre todas as coisas.","Adorar só a Deus, confiar nele e colocá-lo em primeiro lugar na vida.",["Ex 20,2-6","Mt 4,10"]],
+   ["Não tomar seu santo nome em vão.","Respeitar o nome de Deus, de Nossa Senhora e dos santos; não jurar falso.",["Ex 20,7"]],
+   ["Guardar domingos e festas de guarda.","Participar da Santa Missa e dedicar o dia ao Senhor, ao descanso e à família.",["Ex 20,8-11"]]]},
+  {g:"Amor ao próximo",items:[
+   ["Honrar pai e mãe.","Amar, respeitar e ajudar os pais e todos os que têm autoridade legítima.",["Ex 20,12","Ef 6,1-3"]],
+   ["Não matar.","Respeitar e defender a vida humana, desde a concepção até a morte natural.",["Ex 20,13","Mt 5,21-22"]],
+   ["Não pecar contra a castidade.","Viver a pureza no corpo e no coração, conforme o próprio estado de vida.",["Ex 20,14","Mt 5,27-28"]],
+   ["Não furtar.","Respeitar os bens dos outros, ser honesto no trabalho e devolver o que não é seu.",["Ex 20,15"]],
+   ["Não levantar falso testemunho.","Falar sempre a verdade; não mentir, não caluniar nem difamar.",["Ex 20,16"]],
+   ["Não desejar a mulher do próximo.","Guardar a pureza dos pensamentos e desejos, respeitando o matrimônio.",["Ex 20,17"]],
+   ["Não cobiçar as coisas alheias.","Vencer a inveja e a ganância, contentando-se com o que Deus dá.",["Ex 20,17"]]]}],
+  quote:"Mt 22,37-39",
+  src:"Texto bíblico: Êxodo 20 e Deuteronômio 5. Fórmula catequética da Igreja."},
+ igreja:{t:"Mandamentos da Igreja",intro:"São os deveres mínimos de todo católico, para crescer no amor a Deus e ao próximo, em união com a Igreja.",
+  groups:[{g:"",items:[
+   ["Participar da Missa inteira nos domingos e outras festas de guarda.","E abster-se, nesses dias, de trabalhos que impeçam o culto a Deus e o descanso.",["Hb 10,25"]],
+   ["Confessar-se ao menos uma vez por ano.","Receber o perdão de Deus no sacramento da Penitência.",["Jo 20,22-23"]],
+   ["Receber a Eucaristia ao menos pela Páscoa da Ressurreição.","Comungar, em estado de graça, pelo menos no tempo pascal.",["Jo 6,55"]],
+   ["Jejuar e abster-se de carne, conforme manda a Santa Mãe Igreja.","Como na Quarta-feira de Cinzas e na Sexta-feira Santa, e na abstinência das sextas-feiras.",["Mt 6,16-18"]],
+   ["Ajudar a Igreja em suas necessidades.","Contribuir, cada um segundo as suas possibilidades, com o dízimo e o serviço.",["2Cor 9,7"]]]}],
+  quote:"At 2,42",
+  src:"Catecismo da Igreja Católica, n. 2041-2043."},
+ sacr:{t:"Os Sete Sacramentos",intro:"Os sacramentos foram instituídos por Cristo e confiados à Igreja. São sinais visíveis que comunicam a graça de Deus.",
+  groups:[{g:"Iniciação cristã",items:[
+   ["Batismo","Nos faz filhos de Deus, apaga o pecado original e nos torna membros da Igreja.",["Mt 28,19","Jo 3,5"]],
+   ["Confirmação (Crisma)","Confirma a graça do Batismo e nos dá a força do Espírito Santo para testemunhar a fé.",["At 8,14-17"]],
+   ["Eucaristia","O Corpo e o Sangue de Cristo, nosso alimento. É fonte e ápice de toda a vida cristã.",["Lc 22,19-20","Jo 6,55"]]]},
+  {g:"Cura",items:[
+   ["Penitência (Confissão)","Pelo arrependimento e pela absolvição do sacerdote, Deus perdoa os pecados.",["Jo 20,22-23"]],
+   ["Unção dos Enfermos","Dá conforto, paz e força ao doente, unindo-o ao sofrimento de Cristo.",["Tg 5,14-15"]]]},
+  {g:"Serviço da comunhão",items:[
+   ["Ordem","Consagra diáconos, padres e bispos para servir o povo de Deus em nome de Cristo.",["Lc 22,19","1Tm 4,14"]],
+   ["Matrimônio","Une homem e mulher numa aliança de amor fiel, para toda a vida, aberta aos filhos.",["Mt 19,4-6","Ef 5,31-32"]]]}],
+  quote:"Mt 28,19",
+  src:"Catecismo da Igreja Católica, n. 1210-1211."}};
+function openRef(r){const p=parseRef(r);if(p&&p.c!=null)go(p.b,p.c,p.v1)}
+function showDoc(k){const D=DOCS[k];if(!D)return;$("#doc-h").textContent=D.t;const box=$("#doc-body");box.textContent="";
+  const intro=document.createElement("p");intro.className="doc-intro";intro.textContent=D.intro;box.append(intro);let n=0;
+  D.groups.forEach(G=>{if(G.g){const h=document.createElement("div");h.className="doc-group";h.textContent=G.g;box.append(h)}
+    const ul=document.createElement("ol");ul.className="doc-items";
+    G.items.forEach(([title,txt,refs])=>{n++;const li=document.createElement("li");li.className="doc-item";
+      li.innerHTML='<div class="num"></div><div class="body"><h3></h3><p></p><div class="doc-refs"></div></div>';
+      li.querySelector(".num").textContent=n;li.querySelector("h3").textContent=title;li.querySelector("p").textContent=txt;
+      refs.forEach(r=>{const b=document.createElement("button");b.textContent=r;b.onclick=()=>openRef(r);li.querySelector(".doc-refs").append(b)});
+      ul.append(li)});box.append(ul)});
+  const qr=parseRef(D.quote);if(qr&&qr.v1!=null){const vs=[];for(let v=qr.v1;v<=qr.v2;v++)vs.push(B[qr.b].c[qr.c][v]);
+    const q=document.createElement("blockquote");q.className="doc-quote";q.textContent="“"+vs.join(" ").replace(/^["“]|["”]$/g,"").replace(/[,;:]\s*$/,".")+"”";
+    const c=document.createElement("cite");c.textContent=D.quote;q.append(c);q.onclick=()=>openRef(D.quote);box.append(q)}
+  const src=document.createElement("p");src.className="doc-src";src.textContent=D.src;box.append(src);window.scrollTo(0,0)}
+$$(".doc-row").forEach(b=>b.onclick=()=>{showDoc(b.dataset.doc);nav("doc")});
 
 /* ---------- ouvir em voz alta ---------- */
 /* Duas vozes: a voz fixa do app (áudio gravado no servidor, masculina) e as vozes do próprio celular. */
@@ -1118,7 +1228,7 @@ async function wake(on){try{if(on&&!tts.lock&&navigator.wakeLock)tts.lock=await 
   if(!on&&tts.lock){tts.lock.release();tts.lock=null}}catch(e){}}
 
 /* --- comum --- */
-function ttsStart(b,c,i,stopAt){engStop();resetWords();Object.assign(tts,{on:true,paused:false,b,c,i,startV:i,stopAt:stopAt==null?null:stopAt});
+function ttsStart(b,c,i,stopAt){if(typeof roStop==="function"&&view!=="rosary")roStop();engStop();resetWords();Object.assign(tts,{on:true,paused:false,b,c,i,startV:i,stopAt:stopAt==null?null:stopAt});
   $("#player").hidden=false;$$("main").forEach(m=>m.classList.add("has-player"));wake(true);mediaSession();
   if(appSelected()){tts.engine="app";appStart(i)}else if(SYN){tts.engine="sys";if(i===0&&stopAt==null)sysIntro();else sysVerse()}
   else{ttsStop();toast("Este aparelho não tem voz disponível")}}
