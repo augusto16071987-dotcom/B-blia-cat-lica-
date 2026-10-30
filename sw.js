@@ -1,6 +1,6 @@
 // Guarda o app e o texto bíblico para funcionar sem internet.
-const CACHE = "biblia-v14";
-const CORE = ["./", "index.html", "manifest.webmanifest",
+const CACHE = "biblia-v16";
+const CORE = ["./", "index.html", "biblia.json", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
