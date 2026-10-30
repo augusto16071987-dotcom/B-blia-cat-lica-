@@ -191,6 +191,18 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .set-row input[type=range]{flex:1;max-width:200px;accent-color:var(--rubric)}
 .sample{font-family:var(--f-read);font-size:var(--fs);line-height:1.6;margin:12px 0 4px;color:var(--ink)}
 .about{color:var(--muted);font-size:13.5px;line-height:1.6}
+.sx{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-top:12px;overflow:hidden}
+.sx:first-child{margin-top:18px}
+.sx>summary{list-style:none;display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer}
+.sx>summary::-webkit-details-marker{display:none}
+.sx-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--rubric) 11%,transparent);color:var(--rubric)}
+.sx-t{flex:1;min-width:0}
+.sx-t b{display:block;font-size:16px;font-weight:600}
+.sx-t span{display:block;color:var(--muted);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-more{display:flex;align-items:center;gap:4px;color:var(--rubric);font-size:13px;font-weight:600;flex:none}
+.sx-more svg{transition:transform .2s}
+.sx[open] .sx-more svg{transform:rotate(180deg)}
+.sx-body{padding:0 16px 6px;border-top:1px solid var(--line)}
 .about b{color:var(--ink)}
 
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.2s;z-index:60;white-space:nowrap}
@@ -350,23 +362,39 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
   <section class="view" id="v-set" hidden>
     <header class="top gut"><div class="wrap"><h1>Ajustes</h1></div></header>
     <main class="gut"><div class="wrap">
-      <div class="eyebrow">Leitura</div>
-      <div class="set">
-        <div class="set-row"><label for="fs">Tamanho da letra</label><input id="fs" type="range" min="15" max="28" step="1" value="19"></div>
-        <p class="sample">No princípio era o Verbo, e o Verbo estava em Deus.</p>
-      </div>
-      <div class="eyebrow tts-only">Ouvir em voz alta</div>
-      <div class="set tts-only">
-        <div class="set-row"><label for="rate">Velocidade da voz</label><input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1"></div>
-        <div class="set-row sys-only"><label for="pitch">Tom da voz<br><span style="font-weight:400;color:var(--muted);font-size:12.5px">mais grave ← → mais agudo</span></label><input id="pitch" type="range" min="0.5" max="1.5" step="0.05" value="1"></div>
-        <div class="set-row"><span>Voz</span><button class="link" id="voice-open">Padrão do celular</button></div>
-        <div class="set-row"><label for="follow">Marcar as palavras enquanto lê</label><input id="follow" type="checkbox" style="width:22px;height:22px;accent-color:var(--rubric)"></div>
-      </div>
-      <div class="eyebrow">Aparência</div>
-      <div class="set"><div class="set-row"><span>Tema</span>
-        <div class="seg" id="theme" style="margin:0;min-width:210px"><button data-t="auto" aria-pressed="true">Automático</button><button data-t="light" aria-pressed="false">Claro</button><button data-t="dark" aria-pressed="false">Noturno</button></div></div></div>
-      <div class="eyebrow">Sobre o texto</div>
-      <div class="set"><div class="set-row about"><div><b>Bíblia Sagrada — Pe. Manuel de Matos Soares.</b> Tradução católica feita a partir da Vulgata, com 73 livros, incluindo os deuterocanônicos. Os Salmos seguem a numeração da Vulgata (o “Senhor me apascenta” é o Salmo 22). Texto digital do projeto bibliacatolica/biblia (CC0); pode conter pequenos erros de digitalização.</div></div></div>
+      <details class="sx" data-k="read">
+        <summary><span class="sx-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2Z"/><path d="M12 6v14"/></svg></span>
+          <span class="sx-t"><b>Leitura</b><span id="sum-read"></span></span><span class="sx-more"><span class="sx-lbl">Ver mais</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+        <div class="sx-body">
+          <div class="set-row"><label for="fs">Tamanho da letra</label><input id="fs" type="range" min="15" max="28" step="1" value="19"></div>
+          <p class="sample">No princípio era o Verbo, e o Verbo estava em Deus.</p>
+        </div>
+      </details>
+      <details class="sx tts-only" data-k="voice">
+        <summary><span class="sx-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></span>
+          <span class="sx-t"><b>Ouvir em voz alta</b><span id="sum-voice"></span></span><span class="sx-more"><span class="sx-lbl">Ver mais</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+        <div class="sx-body">
+          <div class="set-row"><span>Voz</span><button class="link" id="voice-open">Padrão do celular</button></div>
+          <div class="set-row"><label for="rate">Velocidade da voz</label><input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1"></div>
+          <div class="set-row sys-only"><label for="pitch">Tom da voz<br><span style="font-weight:400;color:var(--muted);font-size:12.5px">mais grave ← → mais agudo</span></label><input id="pitch" type="range" min="0.5" max="1.5" step="0.05" value="1"></div>
+          <div class="set-row"><label for="follow">Marcar as palavras enquanto lê</label><input id="follow" type="checkbox" style="width:22px;height:22px;accent-color:var(--rubric);flex:none"></div>
+        </div>
+      </details>
+      <details class="sx" data-k="look">
+        <summary><span class="sx-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span>
+          <span class="sx-t"><b>Aparência</b><span id="sum-look"></span></span><span class="sx-more"><span class="sx-lbl">Ver mais</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+        <div class="sx-body">
+          <div class="set-row" style="flex-wrap:wrap"><span>Tema</span>
+            <div class="seg" id="theme" style="margin:0;flex:1;min-width:220px"><button data-t="auto" aria-pressed="true">Automático</button><button data-t="light" aria-pressed="false">Claro</button><button data-t="dark" aria-pressed="false">Noturno</button></div></div>
+        </div>
+      </details>
+      <details class="sx" data-k="about">
+        <summary><span class="sx-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></span>
+          <span class="sx-t"><b>Sobre o app</b><span id="sum-about"></span></span><span class="sx-more"><span class="sx-lbl">Ver mais</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+        <div class="sx-body">
+          <div class="set-row about"><div><b>Bíblia Sagrada — Pe. Manuel de Matos Soares.</b> Tradução católica feita a partir da Vulgata, com 73 livros, incluindo os deuterocanônicos.<br><br>Os Salmos seguem a numeração da Vulgata (o “Senhor me apascenta” é o Salmo 22).<br><br>Texto digital do projeto bibliacatolica/biblia (CC0); pode conter pequenos erros de digitalização. Endereços das igrejas: Google e OpenStreetMap.</div></div>
+        </div>
+      </details>
     </div></main>
   </section>
 </div>
@@ -895,7 +923,7 @@ $("#r-listen").onclick=()=>{const start=sel.size?Math.min(...sel):0;const had=se
   if(tts.on&&tts.b===st.b&&tts.c===st.c&&!had){ttsStop();return}ttsStart(st.b,st.c,start)};
 
 /* ---------- igrejas católicas ---------- */
-let chRadius=store.get("chR",10000),chCenter=null;
+let chRadius=store.get("chR",10000),chCenter=null,chErr="";
 const IN_PREVIEW=IN_FRAME;
 if(IN_PREVIEW)$("#ch-preview").hidden=false;
 $$("#ch-radius button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.r===chRadius)));
@@ -916,19 +944,20 @@ $("#ch-city").onsubmit=async e=>{e.preventDefault();const q=$("#ch-q").value.tri
   chMsg("Procurando igrejas em "+q+"…","Isso leva alguns segundos.");
   const sv=await serverChurches("q="+encodeURIComponent(q));
   if(sv&&sv.list){chCenter={lat:sv.lat,lon:sv.lon,label:sv.label};setGmaps(sv.lat,sv.lon);saveLast(sv);renderChurches(sv.list,sv.label);return}
-  if(sv&&sv.error==="cidade_nao_encontrada"){chMsg("Cidade não encontrada","Confira o nome e tente incluir o estado, ex.: Linhares ES.");return}
+  if(sv&&sv.error==="cidade_nao_encontrada"){chMsg("Cidade não encontrada","Confira o nome e tente incluir o estado, ex.: Linhares ES."+(chErr&&chErr!=="cidade_nao_encontrada"?"\n\nMotivo: "+chErr:""));$("#ch-empty").style.whiteSpace="pre-line";return}
   $("#ch-gmaps").href="https://www.google.com/maps/search/igreja+cat%C3%B3lica+"+encodeURIComponent(q);
   try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&accept-language=pt-BR&q="+encodeURIComponent(q));
     const j=await r.json();if(!j.length){chMsg("Cidade não encontrada","Confira o nome e tente incluir o estado, ex.: Linhares ES.");return}
     findChurches(+j[0].lat,+j[0].lon,j[0].display_name.split(",")[0])}
   catch(err){chMsg("Sem conexão","A busca de igrejas precisa de internet. Tente de novo quando estiver conectado.")}};
 function setGmaps(lat,lon){$("#ch-gmaps").href=lat!=null?"https://www.google.com/maps/search/igreja+cat%C3%B3lica/@"+lat.toFixed(5)+","+lon.toFixed(5)+",14z":"https://www.google.com/maps/search/igreja+cat%C3%B3lica"}
-function chMsg(t,d){$("#ch-list").textContent="";$("#ch-count").textContent="";const em=$("#ch-empty");em.hidden=false;em.innerHTML="<strong></strong>";em.firstChild.textContent=t;em.append(d)}
+function chMsg(t,d){$("#ch-empty").style.whiteSpace="";$("#ch-list").textContent="";$("#ch-count").textContent="";const em=$("#ch-empty");em.hidden=false;em.innerHTML="<strong></strong>";em.firstChild.textContent=t;em.append(d)}
 function distKm(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 const OVERPASS=["https://overpass-api.de/api/interpreter","https://overpass.private.coffee/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
 async function serverChurches(qs){try{const c=new AbortController();const t=setTimeout(()=>c.abort(),14000);
   const r=await fetch("/api/igrejas?"+qs+"&r="+chRadius,{signal:c.signal});clearTimeout(t);
-  const j=await r.json().catch(()=>null);return j}catch(e){return null}}
+  const j=await r.json().catch(()=>null);
+  chErr=!j?"servidor "+r.status:(j.error?(j.google||j.detail||j.error):"");return j}catch(e){chErr=e&&e.name==="AbortError"?"o servidor demorou demais":"sem conexão";return null}}
 function saveLast(sv){store.set("chLast",{label:sv.label,lat:sv.lat,lon:sv.lon,r:chRadius,list:sv.list.slice(0,150),at:Date.now()})}
 async function findChurches(lat,lon,label){chCenter={lat,lon,label};setGmaps(lat,lon);chMsg("Procurando igrejas…","Isso leva alguns segundos.");
   const sv=IN_PREVIEW?null:await serverChurches("lat="+lat.toFixed(5)+"&lon="+lon.toFixed(5));
@@ -941,7 +970,7 @@ async function findChurches(lat,lon,label){chCenter={lat,lon,label};setGmaps(lat
   try{data=await Promise.any(OVERPASS.map(async url=>{const r=await fetch(url,{method:"POST",signal:ctl.signal,body:"data="+encodeURIComponent(q),headers:{"Content-Type":"application/x-www-form-urlencoded"}});
     if(!r.ok)throw new Error(r.status);return r.json()}))}catch(e){}
   clearTimeout(tm);ctl.abort();
-  if(!data){if(IN_PREVIEW){chMsg("Busca bloqueada na prévia","Abra o app pelo site do Netlify para ver as igrejas.");return}chMsg("Não foi possível buscar agora","Tente de novo em alguns segundos, ou toque em “Ver igrejas no Google Maps” logo abaixo.");return}
+  if(!data){if(IN_PREVIEW){chMsg("Busca bloqueada na prévia","Abra o app pelo site do Netlify para ver as igrejas.");return}chMsg("Não foi possível buscar agora","Tente de novo em alguns segundos, ou toque em “Ver igrejas no Google Maps” logo abaixo."+(chErr?"\n\nMotivo: "+chErr:""));$("#ch-empty").style.whiteSpace="pre-line";return}
   const seen=new Set();const list=data.elements.map(e=>{const la=e.lat??e.center?.lat,lo=e.lon??e.center?.lon,t=e.tags||{};
       return {name:t.name||"Igreja Católica",lat:la,lon:lo,addr:addrOf(t),mass:t.service_times||"",d:distKm(lat,lon,la,lo)}})
     .filter(x=>x.lat!=null&&!seen.has(x.name+Math.round(x.lat*1e3))&&seen.add(x.name+Math.round(x.lat*1e3))).sort((a,b)=>a.d-b.d);
@@ -966,6 +995,20 @@ function renderChurches(list,label,cached){const ul=$("#ch-list");ul.textContent
     frag.append(li)});ul.append(frag)}
 function loadLastChurches(){if($("#ch-list").children.length)return;const L=store.get("chLast",null);if(L)setGmaps(L.lat,L.lon);
   if(L&&L.list){chCenter={lat:L.lat,lon:L.lon,label:L.label};renderChurches(L.list,L.label,true)}}
+
+/* ---------- ajustes: resumos e sanfona ---------- */
+const FS_NAMES=[[16,"pequena"],[19,"média"],[23,"grande"],[99,"muito grande"]];
+function paintSummaries(){try{
+  const fs=+$("#fs").value;$("#sum-read").textContent="Letra "+FS_NAMES.find(x=>fs<=x[0])[1];
+  const th={auto:"Tema automático",light:"Tema claro",dark:"Tema noturno"}[store.get("theme","auto")];$("#sum-look").textContent=th;
+  $("#sum-voice").textContent=$("#voice-open").textContent+" · "+String(+$("#rate").value).replace(".",",")+"×";
+  $("#sum-about").textContent="Tradução Pe. Matos Soares · 73 livros";}catch(e){}}
+$$(".sx").forEach(d=>{d.addEventListener("toggle",()=>{const lbl=d.querySelector(".sx-lbl");lbl.textContent=d.open?"Fechar":"Ver mais";
+  if(d.open){$$(".sx").forEach(o=>{if(o!==d&&o.open)o.open=false});setTimeout(()=>d.scrollIntoView({block:"nearest",behavior:"smooth"}),60)}})});
+["#fs","#rate"].forEach(id=>$(id).addEventListener("input",paintSummaries));
+$("#theme").addEventListener("click",()=>setTimeout(paintSummaries,0));
+new MutationObserver(paintSummaries).observe($("#voice-open"),{childList:true,characterData:true,subtree:true});
+paintSummaries();
 
 /* ---------- carregar ---------- */
 async function load(){const main=$("#v-home main .wrap");const ld=document.createElement("div");ld.className="loading";
