@@ -433,7 +433,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
         <summary><span class="sx-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2Z"/><path d="M12 6v14"/></svg></span>
           <span class="sx-t"><b>Leitura</b><span id="sum-read"></span></span><span class="sx-more"><span class="sx-lbl">Ver mais</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></span></summary>
         <div class="sx-body">
-          <div class="set-row"><label for="fs">Tamanho da letra</label><input id="fs" type="range" min="15" max="28" step="1" value="19"></div>
+          <div class="set-row"><label for="fs">Tamanho da letra<br><span style="font-weight:400;color:var(--muted);font-size:12.5px">vale para todo o aplicativo</span></label><input id="fs" type="range" min="15" max="28" step="1" value="19"></div>
           <p class="sample">No princípio era o Verbo, e o Verbo estava em Deus.</p>
         </div>
       </details>
@@ -539,10 +539,16 @@ const GROUPS={AT:[["Pentateuco",0,4],["Livros históricos",5,20],["Livros sapien
 /* ---------- tema e letra ---------- */
 function applyTheme(t){const r=document.documentElement;if(t==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);
   $$("#theme button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===t)));}
-function applyFs(px){document.documentElement.style.setProperty("--fs",px+"px");$("#fs").value=px;}
+// O tamanho da letra vale para o app inteiro: a tela toda é ampliada (zoom) e o texto bíblico chega exatamente ao tamanho escolhido.
+const uiZoom=px=>Math.min(1.35,Math.max(0.9,1+(px-19)*0.04));
+function applyFs(px,live){const z=uiZoom(px);
+  if(!live){document.documentElement.style.zoom=z===1?"":String(z);document.documentElement.style.setProperty("--fs",(px/z).toFixed(2)+"px")}
+  $("#fs").value=px;const sm=$(".sample");if(sm)sm.style.fontSize=(px/(live?z0():z)).toFixed(2)+"px"}
+const z0=()=>+(document.documentElement.style.zoom||1);
 applyTheme(store.get("theme","auto"));applyFs(store.get("fs",19));
 $("#theme").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;store.set("theme",b.dataset.t);applyTheme(b.dataset.t)});
-$("#fs").addEventListener("input",e=>{applyFs(+e.target.value);store.set("fs",+e.target.value)});
+$("#fs").addEventListener("input",e=>{applyFs(+e.target.value,true)});
+$("#fs").addEventListener("change",e=>{const px=+e.target.value;store.set("fs",px);applyFs(px);paintSummaries&&paintSummaries();toast("Tamanho da letra ajustado")});
 
 /* ---------- toast ---------- */
 let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1800)}
