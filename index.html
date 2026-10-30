@@ -241,6 +241,8 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .ro-step{font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rubric)}
 .ro-title{font-family:var(--f-display);font-size:21px;font-weight:600;margin:6px 0 10px;letter-spacing:.02em;text-wrap:balance}
 .ro-text{font-family:var(--f-read);font-size:var(--fs);line-height:1.6;white-space:pre-line}
+.ro-hl .done{color:var(--rubric)}
+.ro-hl mark.w{background:var(--gold);color:var(--bg);border-radius:4px;padding:0 2px;margin:0 -2px}
 .ro-text .vr{display:block;color:var(--muted);font-size:.85em;margin-top:8px}
 .ro-extra{margin-top:12px}
 .ro-extra blockquote{margin:0;padding:10px 14px;border-left:3px solid var(--rubric);background:var(--sel);border-radius:0 10px 10px 0;font-family:var(--f-read);font-size:16px;line-height:1.55}
@@ -1062,17 +1064,40 @@ const ORDW=["Primeiro","Segundo","Terceiro","Quarto","Quinto"];
 function roKeyText(){if(ro.i>=RS.length)return null;const S=RS[ro.i],M=MYS[ro.set];
   if(S.key==="mist"){const d=S.extra.d;return {key:"m-"+ro.set+"-"+d,text:ORDW[d-1]+" Mistério "+M.n.replace(/s$/,"")+". "+M.m[d-1][0]+"."}}
   return {key:"p-"+S.key,text:OR[S.key][1].replace(/^V\. |\nV\. |\nR\. /g," ").replace(/\n/g," ")}}
-function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
+/* marca-texto das orações: cada palavra tem um "peso" (tamanho + pausa da pontuação) para acompanhar o áudio */
+let roHi=null;
+function roHiPrep(kt){const S=RS[ro.i];const el=S.key==="mist"?$("#ro-title"):$("#ro-text");const T=el.textContent;
+  const ws=[];const re=/\S+/g;let m,acc=0;
+  const pw=t=>/[.!?]$/.test(t)?8:/[,;:]$/.test(t)?4:0;
+  // no mistério, a voz diz antes "Primeiro Mistério Gozoso." (fora do título)
+  const preToks=S.key==="mist"?kt.text.split(/\s+/).length-T.split(/\s+/).filter(Boolean).length:0;
+  kt.text.split(/\s+/).slice(0,preToks).forEach(t=>acc+=t.length+1+pw(t));
+  while((m=re.exec(T))){const t=m[0];if(/^[VR]\.$/.test(t)){continue}
+    ws.push({s:m.index,e:m.index+t.length,a:acc});acc+=t.length+1+pw(t)}
+  roHi={el,T,ws,total:acc,pre:preToks,last:-2};el.classList.add("ro-hl")}
+function roHiShow(k){const h=roHi;if(!h||k===h.last)return;h.last=k;const el=h.el;el.textContent="";
+  if(k>=h.ws.length){const d=document.createElement("span");d.className="done";d.textContent=h.T;el.append(d);return}
+  if(k<0){el.textContent=h.T;return}
+  const w=h.ws[k];const d=document.createElement("span");d.className="done";d.textContent=h.T.slice(0,w.s);
+  const mk=document.createElement("mark");mk.className="w";mk.textContent=h.T.slice(w.s,w.e);el.append(d,mk,h.T.slice(w.e))}
+function roHiAt(x){const h=roHi;if(!h)return;let k=-1;for(let i=0;i<h.ws.length;i++){if(h.ws[i].a<=x)k=i;else break}roHiShow(k)}
+function roHiClear(){if(roHi){roHi.el.textContent=roHi.T;roHi.el.classList.remove("ro-hl")}roHi=null}
+function roHiTick(my){const f=()=>{if(my!==roSpeakId||!roHi)return;const d=roAU.duration;
+    if(isFinite(d)&&d>0&&!roAU.paused){roHiAt(Math.min(1,roAU.currentTime/Math.max(.3,d-.35))*roHi.total)}
+    requestAnimationFrame(f)};requestAnimationFrame(f)}
+function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();roHiClear();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
 function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText();if(!kt)return;
-  if(tts.on)ttsStop();const my=roSpeakId;const st=t=>{if(my===roSpeakId)$("#ro-aud-st").textContent=t};
+  if(tts.on)ttsStop();const my=roSpeakId;roHiPrep(kt);const st=t=>{if(my===roSpeakId)$("#ro-aud-st").textContent=t};
   const t0=Date.now();let eng="";
-  const done=()=>{const sec=Math.round((Date.now()-t0)/1000);st(sec<2?"A voz "+eng+" terminou sem falar · veja o volume de mídia":"Terminou ("+eng+", "+sec+" s) · toque em Avançar")};
+  const done=()=>{if(my===roSpeakId&&roHi)roHiShow(Infinity);const sec=Math.round((Date.now()-t0)/1000);st(sec<2?"A voz "+eng+" terminou sem falar · veja o volume de mídia":"Terminou · toque em Avançar")};
   let fell=false;
   const viaPhone=why=>{if(fell||my!==roSpeakId)return;fell=true;
     if(!SYN){st(why?why+" · sem voz no celular":"Este celular não tem voz para leitura");return}
     eng="do celular";st((why?why+" · ":"")+"lendo com a voz do celular…");
     // o Chrome do Android às vezes ignora uma fala logo depois de cancelar a anterior: espera um pouco
     setTimeout(()=>{if(my!==roSpeakId)return;const u=utter(kt.text);let started=false;
+      u.onboundary=e=>{if(my!==roSpeakId||!roHi||(e.name&&e.name!=="word"))return;
+        const n=kt.text.slice(0,e.charIndex).split(/\s+/).filter(Boolean).length;roHiShow(n-roHi.pre)};
       u.onstart=()=>{started=true;st("Lendo: "+$("#ro-title").textContent+"…")};u.onend=done;u.onerror=e=>st("A voz do celular falhou ("+(e.error||"erro")+")");
       SYN.speak(u);setTimeout(()=>{if(!started&&my===roSpeakId&&!SYN.speaking)st("A voz do celular não respondeu · veja Ajustes › Voz")},4000)},150)};
   if(!appSelected()){viaPhone();return}
@@ -1080,7 +1105,7 @@ function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText
   fetch(API+"?prayer="+encodeURIComponent(kt.key)+vq()).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(blob=>{
     if(my!==roSpeakId)return;if(roAU._u)URL.revokeObjectURL(roAU._u);roAU._u=URL.createObjectURL(blob);roAU.src=roAU._u;roAU.playbackRate=tts.rate;
     roAU.onended=done;roAU.onerror=()=>viaPhone("Voz do app falhou");
-    return roAU.play().then(()=>st("Lendo: "+$("#ro-title").textContent+"…"))}).catch(e=>viaPhone("Voz do app indisponível ("+(e&&e.message||"erro")+")"))}
+    roHiTick(my);return roAU.play().then(()=>st("Lendo: "+$("#ro-title").textContent+"…"))}).catch(e=>viaPhone("Voz do app indisponível ("+(e&&e.message||"erro")+")"))}
 $("#ro-aud").checked=roAud;$(".ro-audio").classList.toggle("on",roAud);
 $("#ro-aud").onchange=e=>{roAud=e.target.checked;roUnlock();store.set("roAudio",roAud);$(".ro-audio").classList.toggle("on",roAud);if(roAud)roSpeak();else roStop()};
 function roMove(k){if(ro.i>=RS.length&&k>0){ro.i=0}else ro.i=Math.max(0,Math.min(RS.length,ro.i+k));saveRo();paintRosary();
