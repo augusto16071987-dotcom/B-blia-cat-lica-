@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#a3242b">
+<meta name="theme-color" content="#8a6410">
 <meta name="description" content="Bíblia Sagrada católica com 73 livros. Leitura, busca, favoritos e modo noturno, sem internet.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,30 +21,34 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Figtree:wght@400;500;600&display=swap">
 <style>
-/* Layout: leitor de coluna única no estilo de um missal — números em vermelho "rubrica", barra de abas fixa embaixo */
+/* Layout: leitor de coluna única no estilo de um missal — destaques em ouro velho, pomba do Espírito Santo na tela inicial */
 :root{
-  --bg:#f6f6f3;          /* papel levemente acinzentado */
-  --surface:#ffffff;
-  --ink:#1c2230;         /* tinta azul-escura */
-  --muted:#5f6675;
-  --line:#dddfe3;
-  --rubric:#a3242b;      /* vermelho das rubricas do missal */
-  --gold:#9a7a2c;
-  --sel:#e9e4d4;
+  --bg:#f8f5ec;          /* marfim dourado */
+  --surface:#fffdf7;
+  --ink:#2a2418;         /* tinta sépia escura */
+  --muted:#6e6553;
+  --line:#e7dfcc;
+  --rubric:#8a6410;      /* destaque: ouro velho */
+  --on-accent:#ffffff;
+  --gold:#b8892b;
+  --sel:#f1e7cc;
   --hl-y:#f6e7a1; --hl-g:#cfe8c7; --hl-b:#cddff3; --hl-r:#f3cfd2;
   --season:#3f7d4a;
+  --glow:#f3d27a; --ray:#e2b850; --dove-a:#fffaf0; --dove-b:#f0d590; --dove-line:#b8892b;
   --f-display:"Cinzel","Trajan Pro",Georgia,serif;
   --f-read:"Literata",Georgia,"Times New Roman",serif;
   --f-ui:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --fs:19px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12151c;--surface:#1a1e27;--ink:#e3e1da;--muted:#9aa0ab;--line:#2b303b;
-  --rubric:#e0676d;--gold:#cfae62;--sel:#2e3240;
+  --bg:#13110d;--surface:#1d1a14;--ink:#ece5d3;--muted:#a69d88;--line:#332e24;
+  --rubric:#e0b75a;--on-accent:#1a1407;--gold:#e8c56e;--sel:#2f2a1f;
+  --glow:#f5d27a;--ray:#f0c860;--dove-a:#ffffff;--dove-b:#f7e3a8;--dove-line:#c9a043;
   --hl-y:#5a4e1c;--hl-g:#2a4a2c;--hl-b:#233a55;--hl-r:#5a2a2e;color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#12151c;--surface:#1a1e27;--ink:#e3e1da;--muted:#9aa0ab;--line:#2b303b;
-  --rubric:#e0676d;--gold:#cfae62;--sel:#2e3240;
+  --bg:#13110d;--surface:#1d1a14;--ink:#ece5d3;--muted:#a69d88;--line:#332e24;
+  --rubric:#e0b75a;--on-accent:#1a1407;--gold:#e8c56e;--sel:#2f2a1f;
+  --glow:#f5d27a;--ray:#f0c860;--dove-a:#ffffff;--dove-b:#f7e3a8;--dove-line:#c9a043;
   --hl-y:#5a4e1c;--hl-g:#2a4a2c;--hl-b:#233a55;--hl-r:#5a2a2e;color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -88,6 +92,15 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .vday blockquote::before{content:"“";font-family:var(--f-display);color:var(--rubric);font-size:30px;line-height:0;vertical-align:-.35em;margin-right:4px}
 .vday .row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:14px}
 .vday cite{font-style:normal;font-weight:600;color:var(--rubric);font-size:14px}
+.ev-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.ev-title{font-family:var(--f-display);font-size:13.5px;letter-spacing:.05em;color:var(--ink);font-weight:600;flex:1 1 200px;text-wrap:balance}
+.ev-ref{font-style:normal;font-weight:600;color:var(--rubric);font-size:14px;white-space:nowrap}
+.ev-text{font-family:var(--f-read);font-size:18px;line-height:1.65;position:relative;max-height:13.5em;overflow:hidden}
+.ev-text.open{max-height:none}
+.ev-text:not(.open)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4.5em;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--surface) 96%,transparent))}
+.ev-text sup{font-family:var(--f-ui);font-size:.6em;font-weight:600;color:var(--rubric);margin:0 3px 0 2px;vertical-align:.45em}
+.ev-text .ev-end{display:block;margin-top:10px;font-style:italic;color:var(--rubric)}
+.ev-more{margin-top:8px;color:var(--rubric);font-weight:600;font-size:14px;padding:6px 0}
 .chip-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:500;background:var(--bg)}
 .chip-btn:active{background:var(--sel)}
 .continue{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
@@ -146,7 +159,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .deut{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--gold);border:1px solid currentColor;border-radius:4px;padding:1px 4px;margin-left:8px;vertical-align:2px}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;margin-top:16px}
 .cgrid button{aspect-ratio:1;max-width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-weight:600;font-variant-numeric:tabular-nums;font-size:15px}
-.cgrid button.cur{background:var(--rubric);color:var(--surface);border-color:var(--rubric)}
+.cgrid button.cur{background:var(--rubric);color:var(--on-accent);border-color:var(--rubric)}
 
 /* busca */
 .search-box{position:relative;margin:16px 0 6px}
@@ -169,7 +182,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .bcard .bc-top div{flex:1;min-width:0}
 .bcard .bc-top b{display:block;font-size:17px;font-weight:600}
 .bcard .bc-top span{color:var(--muted);font-size:13px}
-.bcard .open{background:var(--rubric);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px;flex:none}
+.bcard .open{background:var(--rubric);color:var(--on-accent);border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px;flex:none}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;min-width:38px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
@@ -182,6 +195,19 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .res mark{background:var(--hl-y);color:inherit;border-radius:3px;padding:0 1px}
 .empty{color:var(--muted);text-align:center;padding:40px 10px;line-height:1.6}
 .empty strong{display:block;color:var(--ink);font-family:var(--f-display);font-size:17px;letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+
+/* pomba do Espírito Santo */
+.home-main{position:relative;overflow:hidden}
+.dove{position:absolute;left:50%;top:-40px;width:min(520px,125vw);transform:translateX(-50%);pointer-events:none;z-index:0;opacity:.9}
+.dove-art{display:block;width:100%;height:auto}
+.dv-rays{transform-origin:0 0;animation:dvSpin 120s linear infinite}
+.dv-bird{animation:dvFloat 6s ease-in-out infinite}
+@keyframes dvSpin{to{transform:rotate(360deg)}}
+@keyframes dvFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.home-main .wrap{position:relative;z-index:1}
+.home-main .season{padding-top:300px}
+.vday{background:color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.dove-cap{text-align:center;font-family:var(--f-display);font-size:13px;letter-spacing:.18em;color:var(--rubric);margin:-6px 0 0;text-transform:uppercase}
 
 /* ajustes */
 .set{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:4px 16px;margin-top:10px}
@@ -221,7 +247,7 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .player .info b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .player .info span{opacity:.7}
 .pbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--bg);flex:none}
-.pbtn.main{background:var(--rubric);color:#fff}
+.pbtn.main{background:var(--rubric);color:var(--on-accent)}
 .pspeed{font-size:12.5px;font-weight:600;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);border-radius:999px;padding:5px 9px;color:var(--bg);flex:none;font-variant-numeric:tabular-nums}
 main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
 
@@ -247,7 +273,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
 .church-cta .ic{width:46px;height:46px;border-radius:12px;background:color-mix(in srgb,var(--rubric) 12%,transparent);color:var(--rubric);display:grid;place-items:center;flex:none}
 .church-cta .t{flex:1;min-width:0}.church-cta b{display:block;font-size:16px;font-weight:600}.church-cta span{color:var(--muted);font-size:13px}
 .loc-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.btn-main{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--rubric);color:#fff;border-radius:12px;padding:12px 16px;font-weight:600;font-size:15px;flex:1 1 220px}
+.btn-main{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--rubric);color:var(--on-accent);border-radius:12px;padding:12px 16px;font-weight:600;font-size:15px;flex:1 1 220px}
 .btn-main[disabled]{opacity:.6}
 .city{display:flex;gap:8px;margin-top:10px}
 .city input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
@@ -261,7 +287,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
 .ch-item .mass{font-size:12.5px;color:var(--ink);grid-column:1}
 .ch-go{grid-column:2;grid-row:1 / span 3;display:flex;flex-direction:column;gap:6px}
 .ch-go a{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border-radius:10px;padding:9px 14px;font-weight:600;font-size:14px}
-.ch-go a.ir{background:var(--rubric);color:#fff}
+.ch-go a.ir{background:var(--rubric);color:var(--on-accent)}
 .ch-go a.waze{border:1px solid var(--line);color:var(--ink);font-size:12.5px;padding:6px 10px}
 .gmaps{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;border-radius:12px;padding:13px;font-weight:600}
 .note{color:var(--muted);font-size:12px;line-height:1.5;margin:16px 0}
@@ -275,12 +301,53 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
     <header class="top gut"><div class="wrap"><h1>Bíblia Católica</h1>
       <button class="icon-btn" id="h-search" aria-label="Buscar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
     </div></header>
-    <main class="gut"><div class="wrap">
+    <main class="gut home-main"><div class="dove"><svg class="dove-art" viewBox="-260 -230 520 460" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="dvGlow" cx="0" cy="0" r="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="var(--glow)" stop-opacity=".95"/>
+      <stop offset=".35" stop-color="var(--glow)" stop-opacity=".35"/>
+      <stop offset="1" stop-color="var(--glow)" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="dvRay" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="var(--ray)" stop-opacity=".9"/>
+      <stop offset="1" stop-color="var(--ray)" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="dvBody" x1="0" y1="-110" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="var(--dove-a)"/>
+      <stop offset="1" stop-color="var(--dove-b)"/>
+    </linearGradient>
+    <g id="dvShape">
+      <path d="M-15,-12 C-58,-62 -118,-100 -190,-88 C-170,-70 -174,-64 -152,-54 C-163,-45 -160,-38 -136,-32 C-144,-21 -137,-14 -114,-12 C-117,-2 -108,4 -90,1 C-88,11 -78,16 -60,11 C-49,23 -34,21 -17,12 Z"/>
+      <path transform="scale(-1,1)" d="M-15,-12 C-58,-62 -118,-100 -190,-88 C-170,-70 -174,-64 -152,-54 C-163,-45 -160,-38 -136,-32 C-144,-21 -137,-14 -114,-12 C-117,-2 -108,4 -90,1 C-88,11 -78,16 -60,11 C-49,23 -34,21 -17,12 Z"/>
+      <path d="M-13,-34 L-30,-104 Q-15,-96 -8,-108 Q0,-98 8,-108 Q15,-96 30,-104 L13,-34 Z"/>
+      <ellipse cx="0" cy="6" rx="21" ry="46"/>
+      <circle cx="0" cy="58" r="16"/>
+      <path d="M-5,70 L0,84 L5,70 Z"/>
+    </g>
+    <filter id="dvSoft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+  <g class="dv-rays"><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(0.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(11.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(22.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(33.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(45.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(56.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(67.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(78.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(90.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(101.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(112.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(123.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(135.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(146.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(157.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(168.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(180.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(191.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(202.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(213.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(225.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(236.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(247.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(258.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(270.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(281.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(292.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(303.75)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(315.00)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(326.25)"/><rect x="40" y="-3.5" width="230" height="7" rx="3.5" fill="url(#dvRay)" transform="rotate(337.50)"/><rect x="40" y="-2.0" width="165" height="4" rx="2.0" fill="url(#dvRay)" transform="rotate(348.75)"/></g>
+  <circle r="230" fill="url(#dvGlow)"/>
+  <g class="dv-bird">
+    <use href="#dvShape" fill="var(--glow)" filter="url(#dvSoft)" opacity=".9"/>
+    <use href="#dvShape" fill="url(#dvBody)"/>
+    <g fill="none" stroke="var(--dove-line)" stroke-width="2" stroke-linecap="round" opacity=".55">
+      <path d="M-40,-30 C-80,-58 -125,-74 -168,-80"/><path d="M-38,-16 C-75,-36 -110,-48 -140,-50"/><path d="M-34,-4 C-62,-16 -88,-22 -112,-22"/>
+      <path d="M40,-30 C80,-58 125,-74 168,-80"/><path d="M38,-16 C75,-36 110,-48 140,-50"/><path d="M34,-4 C62,-16 88,-22 112,-22"/>
+      <path d="M0,-40 L0,-98"/><path d="M-8,-40 L-18,-96"/><path d="M8,-40 L18,-96"/>
+    </g>
+  </g>
+</svg>
+</div><div class="wrap">
       <div class="season" id="season"><span class="dot"></span><div><b id="season-name">Tempo Comum</b><br><span id="season-date"></span></div></div>
-      <div class="eyebrow">Palavra do dia</div>
-      <div class="vday"><blockquote id="vd-text">Carregando…</blockquote>
+      <div class="eyebrow" id="vd-eyebrow">Evangelho do dia</div>
+      <div class="vday" id="vday">
+        <div class="ev-head" id="ev-head" hidden><span class="ev-title" id="ev-title">Evangelho de Jesus Cristo</span><cite class="ev-ref" id="ev-ref"></cite></div>
+        <div class="ev-text" id="ev-text" hidden></div>
+        <button class="ev-more" id="ev-more" hidden>Ler o Evangelho completo</button>
+        <blockquote id="vd-text">Carregando o Evangelho do dia…</blockquote>
         <div class="row"><cite id="vd-ref"></cite>
-          <div style="display:flex;gap:6px"><button class="chip-btn tts-only" id="vd-listen">Ouvir</button><button class="chip-btn" id="vd-share">Compartilhar</button><button class="chip-btn" id="vd-open">Ler capítulo</button></div></div></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip-btn tts-only" id="vd-listen">Ouvir</button><button class="chip-btn" id="vd-share">Compartilhar</button><button class="chip-btn" id="vd-open">Abrir na Bíblia</button></div></div></div>
       <div class="eyebrow">Continuar lendo</div>
       <button class="continue" id="cont"><div class="big" id="cont-n">1</div><div class="t"><b id="cont-b">Gênesis</b><span id="cont-s"></span></div>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -719,9 +786,59 @@ const VD=["JHN 3 16","MAT 11 28","PHP 4 13","ROM 8 28","JER 29 11","ISA 41 10","
   "LUK 1 37","ISA 40 31","ROM 8 31","PSA 22 1","JHN 6 35","MAT 16 18","EPH 2 8","1JN 1 9","JAS 1 5","2TI 1 7","LUK 15 7"];
 function renderVD(){const n=new Date(),doy=Math.floor((D(n.getFullYear(),n.getMonth(),n.getDate())-D(n.getFullYear(),0,0))/864e5);
   const [id,c,v]=VD[(doy+n.getFullYear())%VD.length].split(" "),b=IDX[id],ci=+c-1,vi=+v-1;const t=B[b].c[ci][vi];
-  $("#vd-text").textContent=t;$("#vd-ref").textContent=B[b].n+" "+c+","+v;
+  $("#vd-eyebrow").textContent="Palavra do dia";$("#vd-text").hidden=false;$("#vd-text").textContent=t;$("#vd-ref").textContent=B[b].n+" "+c+","+v;
   $("#vd-open").onclick=()=>go(b,ci,vi);$("#vd-listen").onclick=()=>speakDaily(b,ci,vi);$("#vd-share").onclick=()=>share("“"+t+"” ("+B[b].a+" "+c+","+v+")");}
 
+
+/* ---------- evangelho do dia ---------- */
+const EV_BOOK={mt:"MAT",mc:"MRK",lc:"LUK",jo:"JHN"};
+const EV_NAME={MAT:"São Mateus",MRK:"São Marcos",LUK:"São Lucas",JHN:"São João"};
+function parseLitRef(ref){
+  let t=String(ref||"").replace(/\(.*?\)/g,"").replace(/[–—]/g,"-").replace(/(\d)[a-z]+/gi,"$1").trim();
+  const m=t.match(/^([1-3]?\s?[A-Za-zÀ-ú]+)\s+(.+)$/);if(!m)return null;
+  const id=EV_BOOK[norm(m[1]).replace(/\s/g,"")];if(!id||IDX[id]==null)return null;const b=IDX[id],bk=B[b];
+  const out=[];let curC=null;
+  const add=(c,v)=>{if(bk.c[c-1]&&bk.c[c-1][v-1]!=null)out.push([c-1,v-1])};
+  for(const grp of m[2].replace(/\s/g,"").split(";")){
+    let g=grp;const cm=g.match(/^(\d+),(.*)$/);if(cm){curC=+cm[1];g=cm[2]}
+    if(curC==null)continue;
+    for(const it of g.split(".")){if(!it)continue;
+      let x=it.match(/^(\d+)-(\d+),(\d+)$/);
+      if(x){const v1=+x[1],c2=+x[2],v2=+x[3];
+        for(let c=curC;c<=c2;c++){const n=(bk.c[c-1]||[]).length;for(let v=(c===curC?v1:1);v<=(c===c2?v2:n);v++)add(c,v)}curC=c2;continue}
+      x=it.match(/^(\d+)-(\d+)$/);if(x){for(let v=+x[1];v<=+x[2];v++)add(curC,v);continue}
+      x=it.match(/^(\d+)$/);if(x)add(curC,+x[1])}}
+  return out.length?{b,id,verses:out}:null}
+const isoLocal=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const COR={verde:"#3f7d4a",branco:"#c9a43b",vermelho:"#b3262e",roxo:"#6b3d8f",rosa:"#d77fa1",preto:"#333"};
+let EV=null;
+function showGospel(day){const P=parseLitRef(day.ref);if(!P)return false;EV={...day,...P};
+  const bk=B[P.b];$("#vd-eyebrow").textContent="Evangelho do dia";
+  $("#ev-head").hidden=false;$("#ev-title").textContent="Evangelho de Jesus Cristo segundo "+EV_NAME[P.id];
+  $("#ev-ref").textContent=day.ref.replace(/\s*\(.*?\)/g,"").replace(/,\s*/g,",");
+  const box=$("#ev-text");box.textContent="";let lastC=-1;
+  P.verses.forEach(([c,v])=>{const sup=document.createElement("sup");sup.textContent=(c!==lastC&&lastC!==-1?(c+1)+",":"")+(v+1);lastC=c;box.append(sup,bk.c[c][v]+" ")});
+  const end=document.createElement("span");end.className="ev-end";end.textContent="Palavra da Salvação.";box.append(end);
+  box.hidden=false;box.classList.remove("open");$("#vd-text").hidden=true;$("#vd-ref").textContent="";
+  requestAnimationFrame(()=>{const more=$("#ev-more");more.hidden=box.scrollHeight<=box.clientHeight+4;more.textContent="Ler o Evangelho completo"});
+  $("#ev-more").onclick=()=>{const o=box.classList.toggle("open");$("#ev-more").textContent=o?"Mostrar menos":"Ler o Evangelho completo"};
+  const [c0,v0]=P.verses[0],[cL,vL]=P.verses[P.verses.length-1];
+  $("#vd-open").onclick=()=>go(P.b,c0,v0);
+  $("#vd-listen").onclick=()=>ttsStart(P.b,c0,v0,cL===c0?vL:B[P.b].c[c0].length-1);
+  $("#vd-share").onclick=()=>share("Evangelho do dia — "+$("#ev-ref").textContent+"\n\n"+P.verses.map(([c,v])=>bk.c[c][v]).join(" ")+"\n\nPalavra da Salvação.");
+  if(day.liturgia){$("#season-name").textContent=day.liturgia;
+    const t=new Date();$("#season-date").textContent=t.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})+(day.cor?" · cor "+day.cor.toLowerCase():"");
+    const col=COR[norm(day.cor||"")];if(col)document.documentElement.style.setProperty("--season",col)}
+  return true}
+async function loadGospel(){const today=isoLocal(new Date());const cache=store.get("evDays",{});
+  if(cache[today]&&showGospel(cache[today])){if(Object.keys(cache).filter(k=>k>=today).length>=3)return}
+  if(IN_FRAME){if(!EV)renderVD();return}
+  try{const c=new AbortController();const tm=setTimeout(()=>c.abort(),15000);
+    const r=await fetch("/api/evangelho?d="+today+"&n=7",{signal:c.signal});clearTimeout(tm);const j=await r.json();
+    const keep={};Object.keys(cache).filter(k=>k>=today).forEach(k=>keep[k]=cache[k]);
+    (j.days||[]).forEach(d=>{if(d.ref)keep[d.date]={ref:d.ref,liturgia:d.liturgia,cor:d.cor}});store.set("evDays",keep);
+    if(!EV&&keep[today])showGospel(keep[today])}catch(e){}
+  if(!EV)renderVD()}
 
 /* ---------- ouvir em voz alta ---------- */
 /* Duas vozes: a voz fixa do app (áudio gravado no servidor, masculina) e as vozes do próprio celular. */
@@ -1025,7 +1142,7 @@ async function load(){const main=$("#v-home main .wrap");const ld=document.creat
   }catch(e){if(e==="ok"){}else{ld.innerHTML='<div><div class="cross">✠</div>Não foi possível abrir o texto bíblico.<br>Verifique a internet e abra o app de novo.</div>';return}}
   B.forEach((b,i)=>IDX[b.id]=i);if(!B[st.b]||!B[st.b].c[st.c]){st.b=0;st.c=0}
   ld.remove();keep.forEach(e=>e.hidden=false);
-  renderVD();updateContinue();renderChapter();
+  loadGospel();updateContinue();renderChapter();
   setTimeout(buildNorm,1500);}
 renderSeason();load();
 
