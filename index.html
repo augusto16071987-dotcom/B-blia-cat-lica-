@@ -514,7 +514,7 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       <button class="icon-btn" id="ro-restart" aria-label="Recomeçar"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button></div></header>
     <main class="gut"><div class="wrap">
       <div class="ro-sets" id="ro-sets"></div>
-      <label class="ro-audio tts-only" for="ro-aud"><input type="checkbox" id="ro-aud"><span class="ro-aud-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ro-aud-t"><b>Ouvir as orações</b><span id="ro-aud-st">Lê em voz alta cada oração ao avançar</span></span></label>
+      <label class="ro-audio tts-only" for="ro-aud"><input type="checkbox" id="ro-aud"><span class="ro-aud-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg></span><span class="ro-aud-t"><b>Ouvir as orações</b><span id="ro-aud-st">Lê e marca cada oração ao avançar</span></span></label>
       <div class="ro-stage">
         <svg id="ro-svg" viewBox="0 0 300 440" role="img" aria-label="Terço"></svg>
         <div class="ro-name" id="ro-name"></div>
@@ -1066,7 +1066,9 @@ function roKeyText(){if(ro.i>=RS.length)return null;const S=RS[ro.i],M=MYS[ro.se
   return {key:"p-"+S.key,text:OR[S.key][1].replace(/^V\. |\nV\. |\nR\. /g," ").replace(/\n/g," ")}}
 /* marca-texto das orações: cada palavra tem um "peso" (tamanho + pausa da pontuação) para acompanhar o áudio */
 let roHi=null;
-function roHiPrep(kt){const S=RS[ro.i];const el=S.key==="mist"?$("#ro-title"):$("#ro-text");const T=el.textContent;
+function roHiPrep(kt){const S=RS[ro.i];const el=S.key==="mist"?$("#ro-title"):$("#ro-text");
+  // o texto vem sempre da oração atual (nunca do que está na tela), para nunca ficar trocado
+  const T=S.key==="mist"?MYS[ro.set].m[S.extra.d-1][0]:OR[S.key][1];el.textContent=T;
   const ws=[];const re=/\S+/g;let m,acc=0;
   const pw=t=>/[.!?]$/.test(t)?8:/[,;:]$/.test(t)?4:0;
   // no mistério, a voz diz antes "Primeiro Mistério Gozoso." (fora do título)
@@ -1085,7 +1087,7 @@ function roHiClear(){if(roHi){if(roHi.el.querySelector(".done,mark.w"))roHi.el.t
 function roHiTick(my){const f=()=>{if(my!==roSpeakId||!roHi)return;const d=roAU.duration;
     if(isFinite(d)&&d>0&&!roAU.paused){roHiAt(Math.min(1,roAU.currentTime/Math.max(.3,d-.35))*roHi.total)}
     requestAnimationFrame(f)};requestAnimationFrame(f)}
-function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();roHiClear();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê em voz alta cada oração ao avançar"}
+function roStop(){roSpeakId++;roAU.pause();if(SYN)SYN.cancel();roHiClear();$("#ro-aud-st").textContent=roAud?"Toque em Avançar para a próxima oração":"Lê e marca cada oração ao avançar"}
 function roSpeak(){roStop();if(!roAud||view!=="rosary")return;const kt=roKeyText();if(!kt)return;
   if(tts.on)ttsStop();const my=roSpeakId;roHiPrep(kt);const st=t=>{if(my===roSpeakId)$("#ro-aud-st").textContent=t};
   const t0=Date.now();let eng="";
