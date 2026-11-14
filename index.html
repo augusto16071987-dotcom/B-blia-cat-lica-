@@ -100,6 +100,11 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .ev-text:not(.open)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4.5em;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--surface) 96%,transparent))}
 .ev-text sup{font-family:var(--f-ui);font-size:.6em;font-weight:600;color:var(--rubric);margin:0 3px 0 2px;vertical-align:.45em}
 .ev-text .ev-end{display:block;margin-top:10px;font-style:italic;color:var(--rubric)}
+.ev-pick{margin:-4px 0 14px}
+.ev-seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.ev-seg button{flex:1;border-radius:9px;padding:9px 6px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.ev-seg button[aria-pressed="true"]{background:var(--rubric);color:var(--on-accent)}
+.ev-pick p{margin:7px 2px 0;color:var(--muted);font-size:12.5px;line-height:1.45}
 .ev-more{margin-top:8px;color:var(--rubric);font-weight:600;font-size:14px;padding:6px 0}
 .chip-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:500;background:var(--bg)}
 .chip-btn:active{background:var(--sel)}
@@ -261,6 +266,15 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .ro-prog i{display:block;height:100%;background:var(--rubric);width:0;transition:width .3s}
 
 /* doutrina */
+.hom-cta{margin-top:12px}
+.hom-meta{margin:18px 0 8px}.hom-meta b{display:block;font-family:var(--f-display);font-size:15px;font-weight:600;color:var(--rubric);letter-spacing:.03em}.hom-meta span{color:var(--muted);font-size:13.5px}
+.hom-refs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.hom-refs button{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;color:var(--rubric);background:var(--surface)}
+.hom-body{font-family:var(--f-read);font-size:var(--fs);line-height:1.7}
+.hom-body p{margin:0 0 1em}
+.hom-body .hom-wait{color:var(--muted);font-style:italic}
+.hom-acts{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.hom-note{color:var(--muted);font-size:12.5px;line-height:1.5;margin:18px 0 10px;padding-top:12px;border-top:1px solid var(--line)}
 .doc-list{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .doc-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:13px 16px;border-bottom:1px solid var(--line)}
 .doc-row:last-child{border-bottom:0}
@@ -414,12 +428,17 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
       <div class="season" id="season"><span class="dot"></span><div><b id="season-name">Tempo Comum</b><br><span id="season-date"></span></div></div>
       <div class="eyebrow" id="vd-eyebrow">Evangelho do dia</div>
       <div class="vday" id="vday">
+        <div class="ev-pick" id="ev-pick" hidden><div class="ev-seg" role="group" aria-label="Qual Missa"><button data-k="0" aria-pressed="true">Missa de sábado</button><button data-k="1" aria-pressed="false">Domingo · vigília</button></div>
+          <p>Vai à Missa de sábado à tarde ou à noite? Ela já usa as leituras de domingo.</p></div>
         <div class="ev-head" id="ev-head" hidden><span class="ev-title" id="ev-title">Evangelho de Jesus Cristo</span><cite class="ev-ref" id="ev-ref"></cite></div>
         <div class="ev-text" id="ev-text" hidden></div>
         <button class="ev-more" id="ev-more" hidden>Ler o Evangelho completo</button>
         <blockquote id="vd-text">Carregando o Evangelho do dia…</blockquote>
         <div class="row"><cite id="vd-ref"></cite>
           <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip-btn tts-only" id="vd-listen">Ouvir</button><button class="chip-btn" id="vd-share">Compartilhar</button><button class="chip-btn" id="vd-open">Abrir na Bíblia</button></div></div></div>
+      <button class="church-cta hom-cta" id="open-homily"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12Z"/><path d="M12 8v6M9 11h6"/></svg></div>
+        <div class="t"><b>Homilia do dia</b><span>Reflexão sobre as leituras de hoje</span></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
       <div class="eyebrow">Oração</div>
       <button class="church-cta" id="open-rosary"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="6"/><circle cx="12" cy="2.5" r="1" fill="currentColor"/><circle cx="17.2" cy="5.5" r="1" fill="currentColor"/><circle cx="17.2" cy="11.5" r="1" fill="currentColor"/><circle cx="6.8" cy="5.5" r="1" fill="currentColor"/><circle cx="6.8" cy="11.5" r="1" fill="currentColor"/><path d="M12 14.5v3M10.3 19.5h3.4M12 17.5v5"/></svg></div>
         <div class="t"><b>Rezar o Terço</b><span id="ro-home-sub">Mistérios do dia</span></div>
@@ -531,6 +550,18 @@ main.has-player{padding-bottom:calc(144px + env(safe-area-inset-bottom,0px))}
         <button class="ro-next" id="ro-next">Avançar<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg></button>
       </div>
       <div class="ro-prog"><i id="ro-bar"></i></div>
+    </div></main>
+  </section>
+
+  <!-- HOMILIA -->
+  <section class="view" id="v-homily" hidden>
+    <header class="top gut"><div class="wrap"><button class="icon-btn back-btn" aria-label="Voltar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg></button><h1>Homilia do dia</h1></div></header>
+    <main class="gut"><div class="wrap">
+      <div class="hom-meta"><b id="hom-lit"></b><span id="hom-date"></span></div>
+      <div class="hom-refs" id="hom-refs"></div>
+      <div class="hom-body" id="hom-body"></div>
+      <div class="hom-acts" id="hom-acts" hidden><button class="chip-btn" id="hom-share">Compartilhar</button><button class="chip-btn" id="hom-gospel">Ler o Evangelho</button></div>
+      <p class="hom-note">Reflexão escrita por inteligência artificial (Google Gemini) a partir das leituras da Missa de hoje. Serve para a meditação pessoal e não substitui a homilia do sacerdote na Santa Missa.</p>
     </div></main>
   </section>
 
@@ -947,7 +978,7 @@ function parseLitRef(ref){
 const isoLocal=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const COR={verde:"#3f7d4a",branco:"#c9a43b",vermelho:"#b3262e",roxo:"#6b3d8f",rosa:"#d77fa1",preto:"#333"};
 let EV=null;
-function showGospel(day){const P=parseLitRef(day.ref);if(!P)return false;EV={...day,...P};
+function showGospel(day){const P=parseLitRef(day.ref);if(!P)return false;EV={...day,...P};paintPick();
   const bk=B[P.b];$("#vd-eyebrow").textContent="Evangelho do dia";
   $("#ev-head").hidden=false;$("#ev-title").textContent="Evangelho de Jesus Cristo segundo "+EV_NAME[P.id];
   $("#ev-ref").textContent=day.ref.replace(/\s*\(.*?\)/g,"").replace(/,\s*/g,",");
@@ -962,17 +993,24 @@ function showGospel(day){const P=parseLitRef(day.ref);if(!P)return false;EV={...
   $("#vd-listen").onclick=()=>ttsStart(P.b,c0,v0,cL===c0?vL:B[P.b].c[c0].length-1);
   $("#vd-share").onclick=()=>share("Evangelho do dia — "+$("#ev-ref").textContent+"\n\n"+P.verses.map(([c,v])=>bk.c[c][v]).join(" ")+"\n\nPalavra da Salvação.");
   if(day.liturgia){$("#season-name").textContent=day.liturgia;
-    const t=new Date();$("#season-date").textContent=t.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})+(day.cor?" · cor "+day.cor.toLowerCase():"");
+    const t=day.date?new Date(day.date+"T12:00:00"):new Date();$("#season-date").textContent=t.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})+(day.cor?" · cor "+day.cor.toLowerCase():"");
     const col=COR[norm(day.cor||"")];if(col)document.documentElement.style.setProperty("--season",col)}
   return true}
+/* sábado: escolher entre a Missa do sábado e a Missa da vigília (leituras de domingo) */
+function tomorrowIso(){const t=new Date();t.setDate(t.getDate()+1);return isoLocal(t)}
+function paintPick(){const box=$("#ev-pick");const cache=store.get("evDays",{});const tm=tomorrowIso();
+  const on=new Date().getDay()===6&&!!cache[tm];box.hidden=!on;if(!on)return;
+  const sun=!!(EV&&EV.date===tm);$$("#ev-pick button").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.k==="1")===sun)))}
+$$("#ev-pick button").forEach(b=>b.onclick=()=>{const cache=store.get("evDays",{});const d=b.dataset.k==="1"?tomorrowIso():isoLocal(new Date());
+  if(cache[d])showGospel({...cache[d],date:d})});
 async function loadGospel(){const today=isoLocal(new Date());const cache=store.get("evDays",{});
-  if(cache[today]&&showGospel(cache[today])){if(Object.keys(cache).filter(k=>k>=today).length>=3)return}
+  if(cache[today]&&showGospel({...cache[today],date:today})){if(Object.keys(cache).filter(k=>k>=today).length>=3)return}
   if(IN_FRAME){if(!EV)renderVD();return}
   try{const c=new AbortController();const tm=setTimeout(()=>c.abort(),15000);
     const r=await fetch("/api/evangelho?d="+today+"&n=7",{signal:c.signal});clearTimeout(tm);const j=await r.json();
     const keep={};Object.keys(cache).filter(k=>k>=today).forEach(k=>keep[k]=cache[k]);
     (j.days||[]).forEach(d=>{if(d.ref)keep[d.date]={ref:d.ref,liturgia:d.liturgia,cor:d.cor}});store.set("evDays",keep);
-    if(!EV&&keep[today])showGospel(keep[today])}catch(e){}
+    if(!EV&&keep[today])showGospel({...keep[today],date:today});else paintPick()}catch(e){}
   if(!EV)renderVD()}
 
 /* ---------- santo terço ---------- */
@@ -1174,6 +1212,33 @@ function showDoc(k){const D=DOCS[k];if(!D)return;$("#doc-h").textContent=D.t;con
     const c=document.createElement("cite");c.textContent=D.quote;q.append(c);q.onclick=()=>openRef(D.quote);box.append(q)}
   const src=document.createElement("p");src.className="doc-src";src.textContent=D.src;box.append(src);window.scrollTo(0,0)}
 $$(".doc-row").forEach(b=>b.onclick=()=>{showDoc(b.dataset.doc);nav("doc")});
+
+/* ---------- homilia do dia (escrita pela IA no servidor, uma vez por dia) ---------- */
+let HOM=null,homBusy=false;
+function paintHomily(h){HOM=h;const body=$("#hom-body");body.textContent="";
+  $("#hom-lit").textContent=h.liturgia||"Homilia do dia";
+  $("#hom-date").textContent=new Date(h.date+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+  const refs=$("#hom-refs");refs.textContent="";
+  (h.leituras||[]).forEach(l=>{const b=document.createElement("button");b.textContent=(l.tipo==="Salmo responsorial"?"Salmo":l.tipo)+" · "+l.ref;
+    b.onclick=()=>{const p=parseRef(l.ref.replace(/\s*\(.*?\)/g,""));if(p&&p.c!=null)go(p.b,p.c,p.v1||0);else toast("Não encontrei essa passagem")};refs.append(b)});
+  h.paragrafos.forEach(t=>{const p=document.createElement("p");p.textContent=t;body.append(p)});$("#hom-acts").hidden=false}
+function homMsg(t){$("#hom-body").innerHTML='<p class="hom-wait"></p>';$("#hom-body .hom-wait").textContent=t;$("#hom-acts").hidden=true}
+async function loadHomily(){const today=EV&&EV.date||isoLocal(new Date());const all=store.get("homilias",{});const c=all[today];
+  if(c&&c.paragrafos){paintHomily(c);return}
+  if(IN_FRAME){$("#hom-lit").textContent="Homilia do dia";homMsg("A homilia aparece no app instalado (aqui na prévia não há internet).");return}
+  if(homBusy)return;homBusy=true;$("#hom-lit").textContent="Homilia do dia";$("#hom-date").textContent="";$("#hom-refs").textContent="";
+  homMsg("Preparando a homilia de hoje… pode levar alguns segundos.");
+  let err="";
+  for(let t=0;t<3;t++){try{const r=await fetch("/api/homilia?d="+today);const j=await r.json().catch(()=>({}));
+      if(r.ok&&j.paragrafos){const keep={},now=isoLocal(new Date());Object.keys(all).filter(k=>k>=now).forEach(k=>keep[k]=all[k]);keep[today]=j;store.set("homilias",keep);
+        if(view==="homily")paintHomily(j);homBusy=false;return}
+      err=j.error==="sem_chave"?"A homilia ainda não foi ativada no servidor (falta a chave do Gemini).":"Não consegui preparar a homilia agora"+(j.detail?" ("+j.detail.slice(0,120)+")":"")+".";
+      if(j.error==="sem_chave")break}catch(e){err="Sem internet para buscar a homilia."}
+    if(t<2){homMsg("Ainda preparando… só mais um instante.");await new Promise(r=>setTimeout(r,1500))}}
+  homBusy=false;homMsg(err+" Toque em Voltar e tente de novo daqui a pouco.")}
+$("#open-homily").onclick=()=>{nav("homily");loadHomily()};
+$("#hom-share").onclick=()=>{if(HOM)share("Homilia do dia — "+(HOM.liturgia||"")+"\n\n"+HOM.paragrafos.join("\n\n"))};
+$("#hom-gospel").onclick=()=>{if(EV){const [c0,v0]=EV.verses[0];go(EV.b,c0,v0)}else show("home")};
 
 /* ---------- ouvir em voz alta ---------- */
 /* Duas vozes: a voz fixa do app (áudio gravado no servidor, masculina) e as vozes do próprio celular. */
